@@ -1,0 +1,17 @@
+# Experiment C - Proposed System (LSTM)
+name: "EXP-C: YOLOv8 + ByteTrack + LSTM (Proposed)"
+description: "Proposed system: YOLO detection + ByteTrack + LSTM temporal analysis."
+detector:
+  model: yolov8n.pt
+  confidence: 0.5
+  iou: 0.45
+tracker:
+  algorithm: bytetrack
+temporal:
+  model: lstm
+  sequence_length: 32
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.3
+random_seed: 42
+status: pending

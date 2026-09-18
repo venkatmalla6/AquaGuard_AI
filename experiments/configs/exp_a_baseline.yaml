@@ -1,0 +1,11 @@
+# Experiment A - YOLOv8 Baseline
+name: "EXP-A: YOLOv8 Baseline"
+description: "Frame-level YOLO detection only. No tracking. No temporal model."
+detector:
+  model: yolov8n.pt
+  confidence: 0.5
+  iou: 0.45
+tracker: null
+temporal: null
+random_seed: 42
+status: pending

@@ -1,0 +1,182 @@
+﻿# ============================================================
+# AquaGuard AI — Main Configuration File
+# All parameters are research-configurable.
+# Changes here affect experiments - document every change.
+# ============================================================
+
+app:
+  name: "AquaGuard AI"
+  version: "1.0.0"
+  debug: true
+  demo_mode: true  # Set false when using real camera/dataset
+
+# -------------------------------------------------------
+# Computer Vision - Detection
+# -------------------------------------------------------
+detector:
+  model: "yolov8n.pt"       # yolov8n (nano=fast), yolov8s, yolov8m
+  confidence: 0.5           # Detection confidence threshold (0.0 - 1.0)
+  iou: 0.45                 # IoU threshold for NMS
+  person_class_id: 0        # COCO class ID for 'person'
+  input_size: 640           # Image size for inference
+  device: "cpu"             # "cpu" or "cuda" or "mps"
+  half_precision: false     # Use FP16 (GPU only)
+
+# -------------------------------------------------------
+# Tracking
+# -------------------------------------------------------
+tracker:
+  algorithm: "bytetrack"    # bytetrack | botsort
+  max_lost_frames: 30       # Frames before track is removed
+  min_track_length: 3       # Minimum frames to confirm a track
+  track_buffer: 30          # ByteTrack buffer size
+
+# -------------------------------------------------------
+# Temporal Feature Extraction
+# (Enable/disable individual features for ablation study)
+# -------------------------------------------------------
+features:
+  enabled:
+    - cx                    # Bounding box center x (normalized)
+    - cy                    # Bounding box center y (normalized)
+    - w                     # Width (normalized)
+    - h                     # Height (normalized)
+    - aspect_ratio          # w / h
+    - displacement          # Distance from previous center
+    - velocity_x            # Horizontal velocity
+    - velocity_y            # Vertical velocity
+    - speed                 # Euclidean speed magnitude
+    - acceleration          # Speed change per frame
+    - direction             # Movement direction (degrees)
+    - movement_variance     # Rolling variance of displacement
+    - vertical_ratio        # Vertical movement fraction
+    - inactivity_frames     # Frames below motion threshold
+    - area                  # Bounding box area (w*h)
+    - area_change           # Change in area
+
+  # Normalization: per-track min-max scaling
+  normalize: true
+
+  # Motion threshold for inactivity detection
+  inactivity_threshold: 5.0  # pixels
+
+# -------------------------------------------------------
+# Temporal Behavior Model
+# -------------------------------------------------------
+temporal:
+  model: "lstm"             # lstm | gru | transformer
+  sequence_length: 32       # Number of frames in input window
+  hidden_size: 128          # Hidden units (LSTM/GRU)
+  num_layers: 2             # Stacked layers
+  dropout: 0.3              # Dropout rate
+  num_classes: 3            # normal / distress / potential_drowning
+  confidence_threshold: 0.7 # Classification confidence threshold
+
+  # Transformer-specific (only used when model=transformer)
+  nhead: 4                  # Number of attention heads
+  dim_feedforward: 256
+
+# -------------------------------------------------------
+# Alert Engine
+# -------------------------------------------------------
+alert:
+  # Minimum confidence to trigger a warning
+  distress_confidence: 0.6
+  # Minimum confidence to trigger a critical alert
+  drowning_confidence: 0.8
+  # Number of consecutive frames required before alert fires
+  consecutive_frames: 5
+  # Cooldown in seconds to prevent duplicate alerts
+  cooldown_seconds: 30
+  # Maximum concurrent active alerts
+  max_active_alerts: 10
+
+# -------------------------------------------------------
+# Training Configuration
+# -------------------------------------------------------
+training:
+  seed: 42                  # Fixed seed for reproducibility
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.001
+  lr_scheduler: "cosine"    # cosine | step | plateau
+  early_stopping_patience: 10
+  val_split: 0.2
+  test_split: 0.1
+  # Split at VIDEO level to prevent data leakage
+  split_by: "video"
+
+# -------------------------------------------------------
+# Data Augmentation
+# -------------------------------------------------------
+augmentation:
+  enabled: true
+  horizontal_flip: true     # Safe for pool scenarios
+  brightness: 0.2           # Brightness jitter factor
+  contrast: 0.2
+  blur: 0.1                 # Gaussian blur probability
+  noise: 0.1                # Gaussian noise probability
+  scale: 0.1                # Scale jitter
+  # NOTE: Rotation is disabled - unusual angles are not realistic
+  rotation: 0
+
+# -------------------------------------------------------
+# Video Processing
+# -------------------------------------------------------
+video:
+  max_upload_mb: 500
+  supported_formats:
+    - ".mp4"
+    - ".avi"
+    - ".mov"
+  frame_skip: 1             # Process every N frames (1=all)
+  resize_width: 640         # Resize frame width for processing
+  save_output: true         # Save processed video
+
+# -------------------------------------------------------
+# Database
+# -------------------------------------------------------
+database:
+  # Set via DATABASE_URL environment variable
+  pool_size: 10
+  max_overflow: 20
+  echo: false               # Set true to log SQL queries
+
+# -------------------------------------------------------
+# Logging
+# -------------------------------------------------------
+logging:
+  level: "INFO"             # DEBUG | INFO | WARNING | ERROR
+  format: "structured"      # structured | text
+  file: "./logs/aquaguard.log"
+  max_size_mb: 50
+  backup_count: 5
+
+# -------------------------------------------------------
+# System Monitoring
+# -------------------------------------------------------
+monitoring:
+  metrics_interval_seconds: 5   # How often to push system metrics via WS
+  fps_window_size: 30           # Rolling window for FPS calculation
+
+# -------------------------------------------------------
+# IoT (ESP32 Integration)
+# -------------------------------------------------------
+iot:
+  enabled: false            # Set true when hardware is connected
+  simulation_mode: true     # Show simulated IoT in UI
+  mqtt_broker: "localhost"
+  mqtt_port: 1883
+  mqtt_topic_alert: "aquaguard/alert"
+  mqtt_topic_status: "aquaguard/status"
+
+# -------------------------------------------------------
+# Experiment Defaults
+# -------------------------------------------------------
+experiments:
+  output_dir: "./experiments/results"
+  figures_dir: "./experiments/figures"
+  logs_dir: "./experiments/logs"
+  configs_dir: "./experiments/configs"
+  # Auto-save experiment config + results
+  auto_save: true

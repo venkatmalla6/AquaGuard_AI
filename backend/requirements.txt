@@ -1,0 +1,54 @@
+﻿# ============================================================
+# AquaGuard AI — Backend Python Dependencies
+# ============================================================
+
+# Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.12
+
+# Data Validation
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# Database
+sqlmodel==0.0.21
+asyncpg==0.30.0
+alembic==1.13.3
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.1
+
+# Computer Vision & AI
+opencv-python-headless==4.10.0.84
+ultralytics==8.3.0
+torch==2.4.1
+torchvision==0.19.1
+numpy==1.26.4
+scikit-learn==1.5.2
+Pillow==10.4.0
+
+# HTTP Client
+httpx==0.27.2
+
+# Config
+PyYAML==6.0.2
+
+# Logging
+loguru==0.7.2
+
+# System Monitoring
+psutil==6.0.0
+
+# Async
+anyio==4.6.0
+
+# Testing
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2
+
+# Serialization
+orjson==3.10.7
