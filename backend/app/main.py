@@ -74,6 +74,11 @@ async def lifespan(app: FastAPI):
     try:
         await create_db_and_tables()
         logger.info("Database initialized successfully.")
+        try:
+            from app.database.seed import seed_initial_data
+            await seed_initial_data()
+        except Exception as e:
+            logger.error(f"Seeding failed: {e}")
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
         logger.warning("Continuing without database - some features will be unavailable.")
@@ -171,17 +176,13 @@ async def root():
 # ============================================================
 # These will be uncommented as each phase is implemented:
 #
-# from app.api.routes import auth, cameras, monitoring, alerts
-# from app.api.routes import experiments, models, datasets, system
-#
-# app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-# app.include_router(cameras.router, prefix="/api/cameras", tags=["Cameras"])
-# app.include_router(monitoring.router, prefix="/api/monitoring", tags=["Monitoring"])
-# app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"])
-# app.include_router(experiments.router, prefix="/api/experiments", tags=["Experiments"])
-# app.include_router(models.router, prefix="/api/models", tags=["Models"])
-# app.include_router(datasets.router, prefix="/api/datasets", tags=["Datasets"])
-# app.include_router(system.router, prefix="/api/system", tags=["System"])
+from app.api.routes import auth, cameras, alerts, experiments, system
+
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(cameras.router, prefix="/api/cameras", tags=["Cameras"])
+app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"])
+app.include_router(experiments.router, prefix="/api/experiments", tags=["Experiments"])
+app.include_router(system.router, prefix="/api/system", tags=["System"])
 
 
 # ============================================================
