@@ -1,7 +1,8 @@
 ﻿// AquaGuard AI - Alerts Page (Phase 8)
 // Live alert feed from API + WS session alerts
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Bell, CheckCircle2, XCircle, Filter } from 'lucide-react';
+import { AlertTriangle, Bell, CheckCircle2, XCircle, Filter, Volume2, VolumeX } from 'lucide-react';
+import { alertAudio } from '../utils/audioAlert';
 import { formatDistanceToNow } from 'date-fns';
 import { alertAPI } from '../services/api';
 import type { Alert } from '../types';
@@ -79,6 +80,19 @@ export default function AlertsPage() {
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<'all' | 'active' | 'critical'>('all');
   const [error,      setError]      = useState('');
+  const [isMuted,    setIsMuted]    = useState(alertAudio.isMuted());
+
+  useEffect(() => {
+    const hasActiveCritical = alerts.some(a => a.severity === 'critical' && a.status === 'active');
+    if (hasActiveCritical && !isMuted) {
+      alertAudio.playCriticalSiren();
+    } else {
+      alertAudio.stopSiren();
+    }
+    return () => {
+      alertAudio.stopSiren();
+    };
+  }, [alerts, isMuted]);
 
   const fetchAlerts = async () => {
     try {
@@ -123,11 +137,28 @@ export default function AlertsPage() {
             {counts.total} total · {counts.active} active · {counts.critical} critical
           </p>
         </div>
-        <button onClick={fetchAlerts}
-          className="px-3 py-1.5 rounded-lg text-xs font-medium"
-          style={{ background: 'rgba(0,181,212,0.1)', color: '#22d3ee', border: '1px solid rgba(0,181,212,0.3)' }}>
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const next = alertAudio.toggleMute();
+              setIsMuted(next);
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              isMuted
+                ? "text-slate-400 border border-slate-700 bg-slate-800/60"
+                : "text-red-400 border border-red-500/40 bg-red-500/10"
+            }`}
+            title={isMuted ? "Siren alarm muted (click to unmute)" : "Siren alarm active (click to mute)"}
+          >
+            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} className="animate-pulse" />}
+            <span>{isMuted ? "Alarm Muted" : "Alarm Armed"}</span>
+          </button>
+          <button onClick={fetchAlerts}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium"
+            style={{ background: 'rgba(0,181,212,0.1)', color: '#22d3ee', border: '1px solid rgba(0,181,212,0.3)' }}>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Stat pills */}
@@ -178,3 +209,5 @@ export default function AlertsPage() {
     </div>
   );
 }
+
+

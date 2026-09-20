@@ -64,7 +64,7 @@ export default function MainLayout() {
             <div className="w-2 h-2 rounded-full bg-green-400" />
             <span>Demo Mode Active</span>
           </div>
-          <p className="text-xs mt-1" style={{ color: '#475569' }}>v1.0.0 | Phase 1</p>
+          <p className="text-xs mt-1" style={{ color: '#475569' }}>v1.0.0 | Phase 9 Active</p>
         </div>
       </aside>
 

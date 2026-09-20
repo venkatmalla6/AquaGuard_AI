@@ -117,3 +117,42 @@ export const BEHAVIOR_CONFIG: Record<BehaviorClass, { label: string; color: stri
   drowning:          { label: 'DROWNING',  color: '#ef4444', bg: 'rgba(239,68,68,0.15)',   pulse: true  },
   potential_drowning:{ label: 'DROWNING',  color: '#ef4444', bg: 'rgba(239,68,68,0.15)',   pulse: true  },
 };
+
+// --- Video Ingestion & Testing (Phase 5 / Phase 9) ---
+export type VideoStatus = 'uploaded' | 'processing' | 'completed' | 'failed';
+
+export interface VideoItem {
+  id: number;
+  video_uid: string;
+  filename: string;
+  original_filename: string;
+  file_size_bytes: number;
+  duration_seconds?: number | null;
+  fps?: number | null;
+  total_frames?: number | null;
+  processed_frames: number;
+  progress_percent: number;
+  resolution_width?: number | null;
+  resolution_height?: number | null;
+  status: VideoStatus;
+  error_message?: string | null;
+  uploaded_at: string;
+  processed_at?: string | null;
+}
+
+// --- People Tracking & Telemetry (Phase 9) ---
+export interface PersonTelemetry {
+  track_id: number;
+  duration_seconds: number;
+  center: [number, number];
+  bbox: [number, number, number, number];
+  aspect_ratio: number;
+  speed_px_s: number;
+  vertical_velocity: number;
+  stillness_score: number;
+  behavior: BehaviorClass;
+  confidence: number;
+  confidence_drowning: number;
+  confidence_distress: number;
+  history: [number, number][];
+}

@@ -45,3 +45,23 @@ export const experimentAPI = {
   create:     (data: Record<string, unknown>) => api.post('/api/experiments', data),
   getMetrics: (id: number) => api.get(`/api/experiments/${id}/metrics`),
 };
+export const videoAPI = {
+  list: () => api.get('/api/videos'),
+  get: (id: number) => api.get(`/api/videos/${id}`),
+  upload: (file: File, autoProcess = true, onProgress?: (pct: number) => void) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(`/api/videos/upload?auto_process=${autoProcess}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total && onProgress) {
+          const pct = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(pct);
+        }
+      },
+    });
+  },
+  process: (id: number) => api.post(`/api/videos/${id}/process`),
+  delete: (id: number) => api.delete(`/api/videos/${id}`),
+  getStreamUrl: (id: number) => `${api.defaults.baseURL || ''}/api/videos/${id}/stream`,
+};
