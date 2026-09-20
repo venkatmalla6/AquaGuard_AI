@@ -444,3 +444,37 @@ class IoTDevice(SQLModel, table=True):
     siren_active: bool = Field(default=False)
     led_active: bool = Field(default=False)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+# ============================================================
+# Video
+# ============================================================
+
+class VideoStatus(str, Enum):
+    UPLOADED = "uploaded"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class Video(SQLModel, table=True):
+    """Uploaded pool surveillance footage and benchmark test videos."""
+    __tablename__ = "videos"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    video_uid: str = Field(default_factory=lambda: str(uuid.uuid4()), unique=True)
+    filename: str
+    original_filename: str
+    filepath: str
+    processed_filepath: Optional[str] = None
+    file_size_bytes: int
+    duration_seconds: Optional[float] = None
+    fps: Optional[float] = None
+    total_frames: Optional[int] = None
+    processed_frames: int = Field(default=0)
+    resolution_width: Optional[int] = None
+    resolution_height: Optional[int] = None
+    status: VideoStatus = Field(default=VideoStatus.UPLOADED)
+    error_message: Optional[str] = None
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+    processed_at: Optional[datetime] = None
+    uploaded_by: Optional[int] = Field(default=None, foreign_key="users.id")

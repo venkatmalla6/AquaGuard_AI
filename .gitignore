@@ -83,3 +83,11 @@ backend/uploads/
 # Research artifacts (track separately)
 research/results/
 research/figures/
+
+# Video test samples
+data/test_samples/
+uploads/
+*.mp4
+*.avi
+*.mov
+

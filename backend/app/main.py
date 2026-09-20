@@ -176,13 +176,14 @@ async def root():
 # ============================================================
 # These will be uncommented as each phase is implemented:
 #
-from app.api.routes import auth, cameras, alerts, experiments, system
+from app.api.routes import auth, cameras, alerts, experiments, system, videos
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(cameras.router, prefix="/api/cameras", tags=["Cameras"])
 app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"])
 app.include_router(experiments.router, prefix="/api/experiments", tags=["Experiments"])
 app.include_router(system.router, prefix="/api/system", tags=["System"])
+app.include_router(videos.router, prefix="/api/videos", tags=["Videos"])
 
 
 # ============================================================
