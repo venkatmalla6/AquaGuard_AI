@@ -1,0 +1,24 @@
+{
+  "lstm_run": {
+    "run": "lstm_run",
+    "label": "LSTM (128x2, T=32)  [Proposed]",
+    "epochs_trained": 11,
+    "test_accuracy": 1.0,
+    "test_macro_f1": 1.0,
+    "test_weighted_f1": 1.0,
+    "drowning_recall": 1.0,
+    "drowning_f1": 1.0,
+    "roc_auc_macro": 1.0
+  },
+  "gru_comparison": {
+    "run": "gru_comparison",
+    "label": "GRU  (128x2, T=32)  [Ablation]",
+    "epochs_trained": 11,
+    "test_accuracy": 1.0,
+    "test_macro_f1": 1.0,
+    "test_weighted_f1": 1.0,
+    "drowning_recall": 1.0,
+    "drowning_f1": 1.0,
+    "roc_auc_macro": 1.0
+  }
+}

@@ -1,0 +1,9 @@
+AquaGuard AI - Experiment Results
+Data: Synthetic (2000 sequences, seed=42)
+NOTE: Synthetic data yields perfect separation. Real-world scores will differ.
+
+Model                                    Epochs    Acc  MacF1   DrRec   DrF1    AUC
+------------------------------------------------------------------------
+LSTM (128x2, T=32)  [Proposed]               11 1.0000 1.0000  1.0000 1.0000 1.0000
+GRU  (128x2, T=32)  [Ablation]               11 1.0000 1.0000  1.0000 1.0000 1.0000
+------------------------------------------------------------------------

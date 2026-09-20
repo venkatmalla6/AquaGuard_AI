@@ -1,0 +1,46 @@
+{
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "weighted_f1": 1.0,
+  "drowning_recall": 1.0,
+  "drowning_precision": 1.0,
+  "drowning_f1": 1.0,
+  "roc_auc_macro": 1.0,
+  "per_class": {
+    "normal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 120
+    },
+    "distress": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 90
+    },
+    "drowning": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 90
+    }
+  },
+  "confusion_matrix": [
+    [
+      120,
+      0,
+      0
+    ],
+    [
+      0,
+      90,
+      0
+    ],
+    [
+      0,
+      0,
+      90
+    ]
+  ]
+}

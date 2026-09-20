@@ -1,0 +1,20 @@
+{
+  "description": "Synthetically generated 16-D behavioral feature sequences for AquaGuard AI LSTM training",
+  "generation_method": "Physiologically-grounded simulation (Pia 1974 IDR model)",
+  "disclaimer": "SYNTHETIC DATA - generated for prototype training. Not real drowning incidents.",
+  "seed": 42,
+  "total_samples": 2000,
+  "class_distribution": {
+    "normal": 800,
+    "distress": 600,
+    "drowning": 600
+  },
+  "sequence_length": 32,
+  "feature_dimensions": 16,
+  "label_map": {
+    "0": "normal",
+    "1": "distress",
+    "2": "drowning"
+  },
+  "split_strategy": "random (video-level split not applicable for synthetic data)"
+}
