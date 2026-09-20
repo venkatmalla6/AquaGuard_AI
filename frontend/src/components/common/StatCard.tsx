@@ -1,11 +1,12 @@
-﻿interface Props {
+﻿import React from 'react';
+interface Props {
   label: string;
   value: string | number;
   icon?: React.ReactNode;
   color?: string;
   sub?: string;
 }
-export default function StatCard({ label, value, icon, color, sub }: Props) {
+export function StatCard({ label, value, icon, color, sub }: Props) {
   return (
     <div className="glass-card p-4 fade-in">
       <div className="flex items-center justify-between mb-2">
@@ -17,3 +18,4 @@ export default function StatCard({ label, value, icon, color, sub }: Props) {
     </div>
   );
 }
+export default StatCard;
