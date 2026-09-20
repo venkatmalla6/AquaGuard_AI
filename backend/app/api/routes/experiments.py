@@ -90,6 +90,140 @@ async def create_experiment(
     return experiment
 
 
+@router.get("/comparison", summary="Side-by-Side Research Comparison")
+async def get_experiments_comparison(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Returns side-by-side benchmark comparison metrics across all experiments (EXP-A through EXP-E).
+    Calculates improvements over baseline for academic presentation and thesis defense.
+    """
+    statement = select(Experiment)
+    exp_results = await session.execute(statement)
+    experiments = exp_results.scalars().all()
+
+    comparison_data = []
+    baseline_f1 = None
+    baseline_rec = None
+
+    for exp in experiments:
+        m_stmt = select(ExperimentMetrics).where(ExperimentMetrics.experiment_id == exp.id)
+        m_res = await session.execute(m_stmt)
+        metric = m_res.scalars().first()
+
+        cm = []
+        if metric and metric.confusion_matrix_json:
+            try:
+                cm = json.loads(metric.confusion_matrix_json)
+            except Exception:
+                cm = []
+
+        item = {
+            "id": exp.id,
+            "name": exp.name,
+            "model_type": exp.model_type,
+            "status": exp.status,
+            "precision": metric.precision if metric else 0.0,
+            "recall": metric.recall if metric else 0.0,
+            "f1_score": metric.f1_score if metric else 0.0,
+            "drowning_precision": metric.precision_drowning if metric else 0.0,
+            "drowning_recall": metric.recall_drowning if metric else 0.0,
+            "drowning_f1": metric.f1_drowning if metric else 0.0,
+            "avg_fps": metric.avg_fps if metric else 0.0,
+            "avg_inference_latency_ms": metric.avg_inference_latency_ms if metric else 0.0,
+            "avg_alert_latency_ms": metric.avg_alert_latency_ms if metric else 0.0,
+            "false_positive_rate": metric.false_positive_rate if metric else 0.0,
+            "false_negative_rate": metric.false_negative_rate if metric else 0.0,
+            "confusion_matrix": cm,
+        }
+
+        if "EXP-A" in exp.name and metric:
+            baseline_f1 = metric.f1_score
+            baseline_rec = metric.recall
+
+        comparison_data.append(item)
+
+    # Compute improvements relative to EXP-A baseline
+    for item in comparison_data:
+        f1 = item["f1_score"]
+        rec = item["recall"]
+        item["improvement_f1_pct"] = round(((f1 - baseline_f1) / max(0.01, baseline_f1)) * 100.0, 1) if baseline_f1 else 0.0
+        item["improvement_recall_pct"] = round(((rec - baseline_rec) / max(0.01, baseline_rec)) * 100.0, 1) if baseline_rec else 0.0
+
+    return comparison_data
+
+
+@router.post("/run-all", summary="Execute Automated Research Benchmark Suite")
+async def run_benchmark_suite(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(require_role(["admin", "researcher"])),
+):
+    """
+    Executes all 5 empirical experiments (EXP-A through EXP-E) on the evaluation dataset,
+    re-computes all metrics, updates database records, and outputs comparison reports.
+    """
+    from ai.evaluation.benchmark_suite import BenchmarkSuite
+
+    suite = BenchmarkSuite()
+    results = suite.run_all()
+
+    exp_id_map = {
+        "exp_a": 1,
+        "exp_b": 2,
+        "exp_c": 3,
+        "exp_d": 4,
+        "exp_e": 5,
+    }
+
+    now = datetime.now(timezone.utc)
+
+    for key, res in results.items():
+        exp_id = exp_id_map.get(key)
+        if not exp_id:
+            continue
+
+        exp = await session.get(Experiment, exp_id)
+        if exp:
+            exp.status = ExperimentStatus.COMPLETED
+            exp.completed_at = now
+            session.add(exp)
+
+        m_stmt = select(ExperimentMetrics).where(ExperimentMetrics.experiment_id == exp_id)
+        m_res = await session.execute(m_stmt)
+        metric = m_res.scalars().first()
+
+        cm_json = json.dumps(res.get("confusion_matrix", []))
+
+        if not metric:
+            metric = ExperimentMetrics(experiment_id=exp_id)
+
+        metric.precision = res["precision"]
+        metric.recall = res["recall"]
+        metric.f1_score = res["f1_score"]
+        metric.precision_normal = res["precision_normal"]
+        metric.precision_distress = res["precision_distress"]
+        metric.precision_drowning = res["precision_drowning"]
+        metric.recall_normal = res["recall_normal"]
+        metric.recall_distress = res["recall_distress"]
+        metric.recall_drowning = res["recall_drowning"]
+        metric.f1_normal = res["f1_normal"]
+        metric.f1_distress = res["f1_distress"]
+        metric.f1_drowning = res["f1_drowning"]
+        metric.false_positive_rate = res["false_positive_rate"]
+        metric.false_negative_rate = res["false_negative_rate"]
+        metric.avg_fps = res["avg_fps"]
+        metric.avg_inference_latency_ms = res["avg_inference_latency_ms"]
+        metric.avg_alert_latency_ms = res["avg_alert_latency_sec"] * 1000.0
+        metric.id_switches = res["id_switches"]
+        metric.confusion_matrix_json = cm_json
+        metric.computed_at = now
+        session.add(metric)
+
+    await session.commit()
+    return {"status": "success", "message": "All 5 benchmark experiments executed and synced successfully", "results": results}
+
+
 @router.get("/{experiment_id}", response_model=Experiment, summary="Get Experiment Details")
 async def get_experiment(
     experiment_id: int,
@@ -151,3 +285,4 @@ async def record_experiment_metrics(
     await session.commit()
     await session.refresh(metrics)
     return metrics
+

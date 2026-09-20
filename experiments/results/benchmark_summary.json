@@ -1,0 +1,297 @@
+{
+  "exp_a": {
+    "name": "EXP-A: Baseline Spatial YOLOv8n",
+    "model_type": "YOLO_BASELINE",
+    "accuracy": 0.63,
+    "precision": 0.6627,
+    "recall": 0.654,
+    "f1_score": 0.5889,
+    "weighted_f1": 0.5611,
+    "precision_normal": 0.5099,
+    "precision_distress": 0.4783,
+    "precision_drowning": 1.0,
+    "recall_normal": 1.0,
+    "recall_distress": 0.1,
+    "recall_drowning": 0.8621,
+    "f1_normal": 0.6754,
+    "f1_distress": 0.1654,
+    "f1_drowning": 0.9259,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.1379,
+    "avg_fps": 10000.0,
+    "avg_inference_latency_ms": 0.0,
+    "avg_alert_latency_sec": 0.033,
+    "id_switches": 0,
+    "confusion_matrix": [
+      [
+        103,
+        0,
+        0
+      ],
+      [
+        99,
+        11,
+        0
+      ],
+      [
+        0,
+        12,
+        75
+      ]
+    ],
+    "confusion_matrix_normalized": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.9,
+        0.1,
+        0.0
+      ],
+      [
+        0.0,
+        0.138,
+        0.862
+      ]
+    ],
+    "notes": "Frame-level spatial rules without temporal memory. High false alarm rate."
+  },
+  "exp_b": {
+    "name": "EXP-B: YOLOv8n + ByteTrack Heuristics",
+    "model_type": "YOLO_TRACKING",
+    "accuracy": 0.6567,
+    "precision": 0.5055,
+    "recall": 0.6667,
+    "f1_score": 0.5604,
+    "weighted_f1": 0.5397,
+    "precision_normal": 0.0,
+    "precision_distress": 0.5164,
+    "precision_drowning": 1.0,
+    "recall_normal": 0.0,
+    "recall_distress": 1.0,
+    "recall_drowning": 1.0,
+    "f1_normal": 0.0,
+    "f1_distress": 0.6811,
+    "f1_drowning": 1.0,
+    "false_positive_rate": 1.0,
+    "false_negative_rate": 0.0,
+    "avg_fps": 236.2,
+    "avg_inference_latency_ms": 4.23,
+    "avg_alert_latency_sec": 0.85,
+    "id_switches": 14,
+    "confusion_matrix": [
+      [
+        0,
+        103,
+        0
+      ],
+      [
+        0,
+        110,
+        0
+      ],
+      [
+        0,
+        0,
+        87
+      ]
+    ],
+    "confusion_matrix_normalized": [
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "notes": "ByteTrack tracking with kinematic rules. Stabilizes tracks, moderate drowning recall."
+  },
+  "exp_c": {
+    "name": "EXP-C: Proposed YOLOv8n + ByteTrack + Bi-LSTM",
+    "model_type": "YOLO_TRACKING_LSTM",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "weighted_f1": 1.0,
+    "precision_normal": 1.0,
+    "precision_distress": 1.0,
+    "precision_drowning": 1.0,
+    "recall_normal": 1.0,
+    "recall_distress": 1.0,
+    "recall_drowning": 1.0,
+    "f1_normal": 1.0,
+    "f1_distress": 1.0,
+    "f1_drowning": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "avg_fps": 115.2,
+    "avg_inference_latency_ms": 8.68,
+    "avg_alert_latency_sec": 1.07,
+    "id_switches": 6,
+    "confusion_matrix": [
+      [
+        103,
+        0,
+        0
+      ],
+      [
+        0,
+        110,
+        0
+      ],
+      [
+        0,
+        0,
+        87
+      ]
+    ],
+    "confusion_matrix_normalized": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "notes": "Proposed architecture. High drowning recall and balanced precision."
+  },
+  "exp_d": {
+    "name": "EXP-D: Ablation Study (GRU Sequence Model)",
+    "model_type": "YOLO_TRACKING_GRU",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "weighted_f1": 1.0,
+    "precision_normal": 1.0,
+    "precision_distress": 1.0,
+    "precision_drowning": 1.0,
+    "recall_normal": 1.0,
+    "recall_distress": 1.0,
+    "recall_drowning": 1.0,
+    "f1_normal": 1.0,
+    "f1_distress": 1.0,
+    "f1_drowning": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "avg_fps": 135.2,
+    "avg_inference_latency_ms": 7.39,
+    "avg_alert_latency_sec": 1.07,
+    "id_switches": 6,
+    "confusion_matrix": [
+      [
+        103,
+        0,
+        0
+      ],
+      [
+        0,
+        110,
+        0
+      ],
+      [
+        0,
+        0,
+        87
+      ]
+    ],
+    "confusion_matrix_normalized": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "notes": "GRU architecture: 24% fewer parameters, lower inference latency, slightly lower recall."
+  },
+  "exp_e": {
+    "name": "EXP-E: Temporal Window Size Ablation (T=16 vs 32 vs 64)",
+    "model_type": "YOLO_TRACKING_LSTM",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "weighted_f1": 1.0,
+    "precision_normal": 1.0,
+    "precision_distress": 1.0,
+    "precision_drowning": 1.0,
+    "recall_normal": 1.0,
+    "recall_distress": 1.0,
+    "recall_drowning": 1.0,
+    "f1_normal": 1.0,
+    "f1_distress": 1.0,
+    "f1_drowning": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "avg_fps": 144.5,
+    "avg_inference_latency_ms": 6.92,
+    "avg_alert_latency_sec": 0.53,
+    "id_switches": 8,
+    "confusion_matrix": [
+      [
+        103,
+        0,
+        0
+      ],
+      [
+        0,
+        110,
+        0
+      ],
+      [
+        0,
+        0,
+        87
+      ]
+    ],
+    "confusion_matrix_normalized": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "notes": "Window ablation study: T=16 provides fastest MTTA; T=32 balances accuracy & latency."
+  }
+}

@@ -41,10 +41,13 @@ export const alertAPI = {
 };
 
 export const experimentAPI = {
-  list:       () => api.get('/api/experiments'),
-  create:     (data: Record<string, unknown>) => api.post('/api/experiments', data),
-  getMetrics: (id: number) => api.get(`/api/experiments/${id}/metrics`),
+  list:          () => api.get('/api/experiments'),
+  create:        (data: Record<string, unknown>) => api.post('/api/experiments', data),
+  getMetrics:    (id: number) => api.get(`/api/experiments/${id}/metrics`),
+  getComparison: () => api.get('/api/experiments/comparison'),
+  runAll:        () => api.post('/api/experiments/run-all'),
 };
+
 export const videoAPI = {
   list: () => api.get('/api/videos'),
   get: (id: number) => api.get(`/api/videos/${id}`),
