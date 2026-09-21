@@ -4,7 +4,7 @@ from loguru import logger
 from sqlmodel import select
 
 from app.database.db import AsyncSessionLocal
-from app.models.models import User, Camera, CameraStatus, Experiment, ExperimentStatus, ModelType
+from app.models.models import User, Camera, CameraStatus, Experiment, ExperimentStatus, ModelType, IoTDevice
 from app.api.deps.auth import get_password_hash
 
 async def seed_initial_data():
@@ -45,3 +45,15 @@ async def seed_initial_data():
             ])
             await session.commit()
             logger.info('Research experiments seeded.')
+
+        # 4. Seed IoT Edge Notification Units (Phase 11)
+        r = await session.execute(select(IoTDevice))
+        if not r.scalars().first():
+            logger.info('Seeding IoT emergency siren & strobe hardware units...')
+            session.add_all([
+                IoTDevice(name='Pool Deck Strobe & Siren #1 (ESP32)', device_type='esp32', location='North Olympic Basin Lane 3', mqtt_topic='aquaguard/siren/zone1', is_simulation=True, status='online', siren_active=False, led_active=False, created_at=datetime.now(timezone.utc)),
+                IoTDevice(name='Lifeguard Tower Acoustic Buzzer #2 (Raspberry Pi)', device_type='raspberry_pi', location='Deep End Observation Tower', mqtt_topic='aquaguard/siren/zone2', is_simulation=True, status='online', siren_active=False, led_active=False, created_at=datetime.now(timezone.utc)),
+                IoTDevice(name='Facility Public Address Relay (Simulation)', device_type='simulation', location='Main Operations Center', mqtt_topic='aquaguard/siren/broadcast', is_simulation=True, status='online', siren_active=False, led_active=False, created_at=datetime.now(timezone.utc)),
+            ])
+            await session.commit()
+            logger.info('IoT emergency notification hardware seeded.')

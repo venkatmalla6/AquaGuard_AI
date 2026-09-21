@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Alert Management Endpoints
 Incident triage, live alert feeds, operator acknowledgment, and resolution.
 """
@@ -11,7 +11,10 @@ from sqlmodel import select, desc
 
 from app.api.deps.auth import get_current_user
 from app.database.db import get_session
-from app.models.models import Alert, AlertSeverity, AlertStatus, BehaviorClass, User
+from app.models.models import Alert, AlertSeverity, AlertStatus, BehaviorClass, User, SystemLog
+from app.services.alert_dispatcher import alert_dispatcher
+from loguru import logger
+import json
 
 router = APIRouter()
 
@@ -59,6 +62,55 @@ async def list_alerts(
     return result.scalars().all()
 
 
+@router.get("/channels", summary="Emergency Notification Channels Status")
+async def get_channels_status(current_user: User = Depends(get_current_user)):
+    """Retrieve status and latency of all configured emergency notification channels."""
+    return alert_dispatcher.get_channels_info()
+
+
+@router.post("/test-dispatch", summary="Trigger Emergency Dispatch Drill")
+async def trigger_test_dispatch(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Simulates an emergency drowning incident and dispatches across all active channels for testing."""
+    drill_alert = Alert(
+        track_id=99,
+        camera_id=1,
+        severity=AlertSeverity.CRITICAL,
+        status=AlertStatus.ACTIVE,
+        behavior=BehaviorClass.POTENTIAL_DROWNING,
+        confidence=0.985,
+        consecutive_frames=16,
+        alert_latency_ms=115.0,
+        notes="[EMERGENCY DRILL] Automated live test of Siren, Webhook, Email, and WebSocket dispatch protocols.",
+        triggered_at=datetime.now(timezone.utc),
+    )
+    session.add(drill_alert)
+    await session.commit()
+    await session.refresh(drill_alert)
+
+    dispatch_res = await alert_dispatcher.dispatch_full(drill_alert, session)
+    return {
+        "status": "success",
+        "drill_alert_id": drill_alert.id,
+        "message": "Emergency broadcast drill executed across all channels",
+        "dispatch_summary": dispatch_res,
+    }
+
+
+@router.post("/webhook-mock", summary="Simulated Emergency Webhook Receiver")
+async def webhook_mock_receiver():
+    """Mock receiver for external EMS / facility management webhooks."""
+    return {"status": "received", "http_code": 200, "timestamp": datetime.now(timezone.utc).isoformat()}
+
+
+@router.post("/sms-mock", summary="Simulated SMS Dispatch Gateway")
+async def sms_mock_receiver():
+    """Mock receiver for SMS emergency notices."""
+    return {"status": "sms_sent", "http_code": 200, "timestamp": datetime.now(timezone.utc).isoformat()}
+
+
 @router.get("/{alert_id}", response_model=Alert, summary="Get Alert Details")
 async def get_alert(
     alert_id: int,
@@ -96,6 +148,13 @@ async def create_alert(
     session.add(alert)
     await session.commit()
     await session.refresh(alert)
+
+    # Automatically broadcast and dispatch across all emergency channels
+    try:
+        await alert_dispatcher.dispatch_full(alert, session)
+    except Exception as exc:
+        logger.error(f"[AlertRoutes] Auto-dispatch failed for alert #{alert.id}: {exc}")
+
     return alert
 
 
@@ -167,3 +226,50 @@ async def mark_false_alarm(
     await session.commit()
     await session.refresh(alert)
     return alert
+
+@router.post("/{alert_id}/dispatch", summary="Dispatch Emergency Multi-Channel Response")
+async def dispatch_emergency_alert(
+    alert_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Explicitly dispatches an existing alert to all emergency channels (Siren, Webhook, Email, WebSocket)."""
+    alert = await session.get(Alert, alert_id)
+    if not alert:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alert not found")
+
+    dispatch_res = await alert_dispatcher.dispatch_full(alert, session)
+    return {
+        "status": "dispatched",
+        "alert_id": alert.id,
+        "dispatch_summary": dispatch_res,
+    }
+
+
+@router.get("/{alert_id}/history", summary="Get Alert Dispatch Audit Logs")
+async def get_alert_dispatch_history(
+    alert_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Retrieve audit log history for an alert incident."""
+    alert = await session.get(Alert, alert_id)
+    if not alert:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alert not found")
+
+    stmt = select(SystemLog).where(SystemLog.component == "alert_dispatcher").order_by(desc(SystemLog.timestamp)).limit(20)
+    res = await session.execute(stmt)
+    logs = res.scalars().all()
+
+    matching_logs = []
+    for l in logs:
+        if l.details and f'"alert_id": {alert_id}' in l.details:
+            matching_logs.append({
+                "id": l.id,
+                "timestamp": l.timestamp.isoformat(),
+                "level": l.level,
+                "message": l.message,
+                "details": json.loads(l.details) if l.details else {},
+            })
+
+    return matching_logs

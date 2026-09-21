@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - Extended Types (Phase 8)
+// AquaGuard AI - Extended Types (Phase 8)
 export type BehaviorClass = 'normal' | 'distress' | 'drowning' | 'potential_drowning';
 export type AlertSeverity = 'warning' | 'critical';
 export type AlertStatus   = 'active' | 'acknowledged' | 'resolved' | 'false_alarm';
@@ -155,4 +155,34 @@ export interface PersonTelemetry {
   confidence_drowning: number;
   confidence_distress: number;
   history: [number, number][];
+}
+
+// --- Emergency Notification & Dispatch (Phase 11) ---
+export interface DispatchChannel {
+  name: string;
+  protocol: string;
+  endpoint?: string;
+  hardware?: string;
+  target?: string;
+  status: string;
+  enabled: boolean;
+  latency_ms: number;
+}
+
+export interface AlertAuditLog {
+  id: number;
+  timestamp: string;
+  level: string;
+  message: string;
+  details: {
+    alert_id?: number;
+    severity?: string;
+    track_id?: number;
+    channels?: {
+      websocket?: boolean;
+      iot_devices_activated?: number;
+      webhook_status?: string;
+      email_status?: string;
+    };
+  };
 }

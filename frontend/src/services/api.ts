@@ -1,4 +1,4 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
@@ -35,9 +35,13 @@ export const systemAPI = {
 };
 
 export const alertAPI = {
-  list:        (params?: Record<string, string>) => api.get('/api/alerts', { params }),
-  acknowledge: (id: number) => api.post(`/api/alerts/${id}/acknowledge`),
-  resolve:     (id: number) => api.post(`/api/alerts/${id}/resolve`),
+  list:          (params?: Record<string, string>) => api.get('/api/alerts', { params }),
+  acknowledge:   (id: number) => api.post(`/api/alerts/${id}/acknowledge`),
+  resolve:       (id: number) => api.post(`/api/alerts/${id}/resolve`),
+  getChannels:   () => api.get('/api/alerts/channels'),
+  testDispatch:  () => api.post('/api/alerts/test-dispatch'),
+  dispatchAlert: (id: number) => api.post(`/api/alerts/${id}/dispatch`),
+  getHistory:    (id: number) => api.get(`/api/alerts/${id}/history`),
 };
 
 export const experimentAPI = {
