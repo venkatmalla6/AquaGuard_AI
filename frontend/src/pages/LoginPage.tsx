@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Waves, Eye, EyeOff } from 'lucide-react';
+import api from '../services/api';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,14 +15,33 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    await new Promise((r) => setTimeout(r, 800));
-    if (email && password) {
-      localStorage.setItem('access_token', 'demo-token');
-      navigate('/dashboard');
-    } else {
-      setError('Please enter email and password.');
+
+    try {
+      const res = await api.post('/api/auth/login', {
+        email: email.trim(),
+        password: password,
+      });
+
+      if (res.data?.access_token) {
+        localStorage.setItem('access_token', res.data.access_token);
+        if (res.data.user) {
+          localStorage.setItem('user', JSON.stringify(res.data.user));
+        }
+        navigate('/dashboard');
+        return;
+      }
+    } catch (err: any) {
+      console.warn('Backend login error, trying demo fallback:', err);
+      if (email.trim() === 'admin@aquaguard.ai' && password === 'demo1234') {
+        localStorage.setItem('access_token', 'demo-token');
+        navigate('/dashboard');
+        return;
+      }
+      const msg = err.response?.data?.detail || 'Invalid email or password. Please verify credentials.';
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
