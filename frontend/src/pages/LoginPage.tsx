@@ -1,7 +1,8 @@
 ﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Waves, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Waves, Eye, EyeOff, ShieldCheck, Video, FlaskConical, LayoutDashboard } from 'lucide-react';
 import api from '../services/api';
+import { getDefaultHomeForRole } from '../App';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -24,31 +25,37 @@ export default function LoginPage() {
 
       if (res.data?.access_token) {
         localStorage.setItem('access_token', res.data.access_token);
+        let userRole = 'admin';
         if (res.data.user) {
           localStorage.setItem('user', JSON.stringify(res.data.user));
+          userRole = (res.data.user.role || 'admin').toLowerCase();
         } else {
+          userRole = email.startsWith('operator') ? 'operator' : (email.startsWith('researcher') ? 'researcher' : 'admin');
           localStorage.setItem('user', JSON.stringify({
             id: 1,
             email: email.trim(),
-            name: email.startsWith('admin') ? 'Safety Commander' : (email.startsWith('operator') ? 'Lead Lifeguard' : 'Safety Researcher'),
-            role: email.startsWith('admin') ? 'admin' : (email.startsWith('operator') ? 'operator' : 'researcher'),
+            name: userRole === 'operator' ? 'Head Lifeguard' : (userRole === 'researcher' ? 'AI Research Engineer' : 'Safety Commander'),
+            role: userRole,
           }));
         }
-        navigate('/dashboard');
+        // Route to designated role workstation
+        navigate(getDefaultHomeForRole(userRole));
         return;
       }
     } catch (err: any) {
       console.warn('Backend login error, trying demo fallback:', err);
-      if (email.trim() === 'admin@aquaguard.ai' && password === 'demo1234') {
+      const trimmed = email.trim();
+      if (password === 'demo1234' && (trimmed === 'admin@aquaguard.ai' || trimmed === 'operator@aquaguard.ai' || trimmed === 'researcher@aquaguard.ai')) {
+        const userRole = trimmed.startsWith('operator') ? 'operator' : (trimmed.startsWith('researcher') ? 'researcher' : 'admin');
         localStorage.setItem('access_token', 'demo-token');
         localStorage.setItem('user', JSON.stringify({
           id: 1,
-          email: 'admin@aquaguard.ai',
-          name: 'Safety Commander',
-          role: 'admin',
+          email: trimmed,
+          name: userRole === 'operator' ? 'Head Lifeguard (Operator)' : (userRole === 'researcher' ? 'AI Research Engineer' : 'System Administrator'),
+          role: userRole,
           is_active: true,
         }));
-        navigate('/dashboard');
+        navigate(getDefaultHomeForRole(userRole));
         return;
       }
       const msg = err.response?.data?.detail || 'Invalid email or password. Please verify credentials.';
@@ -68,7 +75,7 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center p-4"
       style={{ background: 'linear-gradient(135deg, #020617 0%, #0f172a 50%, #020617 100%)' }}
     >
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <div
             className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg shadow-cyan-500/20"
@@ -84,10 +91,13 @@ export default function LoginPage() {
 
         <div className="glass-card p-8 rounded-2xl border" style={{ borderColor: 'rgba(51, 65, 85, 0.6)' }}>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-white">Sign In</h2>
+            <div>
+              <h2 className="text-lg font-semibold text-white">Sign In</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Role-Based Workstation Access</p>
+            </div>
             <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30">
               <ShieldCheck size={12} />
-              <span>Mesh v1.0.0</span>
+              <span>RBAC Enabled</span>
             </div>
           </div>
 
@@ -135,7 +145,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPwd(!showPwd)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
                 >
                   {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -152,36 +162,56 @@ export default function LoginPage() {
                 opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? 'Authenticating...' : 'Sign In to Mission Control'}
+              {loading ? 'Authenticating...' : 'Sign In to Station'}
             </button>
           </form>
 
-          {/* Quick presets for testing */}
+          {/* Quick presets with explicit role descriptions */}
           <div className="mt-6 pt-5 border-t" style={{ borderColor: 'rgba(51, 65, 85, 0.4)' }}>
             <p className="text-center text-[11px] font-medium text-slate-400 mb-2.5">
-              Quick Select Role Presets (Password: <code className="text-cyan-400 font-mono">demo1234</code>)
+              Select Role Workstation (Password: <code className="text-cyan-400 font-mono">demo1234</code>)
             </p>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setRolePreset('admin@aquaguard.ai')}
-                className="px-2 py-1.5 rounded text-[11px] font-semibold border transition-all text-cyan-300 hover:bg-cyan-500/10 border-cyan-500/30"
+                className="p-2 rounded-lg text-left border transition-all hover:bg-cyan-500/10 border-cyan-500/30 cursor-pointer group"
               >
-                Admin
+                <div className="flex items-center gap-1 text-cyan-300 font-bold text-xs mb-1">
+                  <LayoutDashboard size={13} />
+                  <span>Admin</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  All 7 Modules + System Settings
+                </p>
               </button>
+
               <button
                 type="button"
                 onClick={() => setRolePreset('operator@aquaguard.ai')}
-                className="px-2 py-1.5 rounded text-[11px] font-semibold border transition-all text-amber-300 hover:bg-amber-500/10 border-amber-500/30"
+                className="p-2 rounded-lg text-left border transition-all hover:bg-amber-500/10 border-amber-500/30 cursor-pointer group"
               >
-                Operator
+                <div className="flex items-center gap-1 text-amber-300 font-bold text-xs mb-1">
+                  <Video size={13} />
+                  <span>Operator</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  Live Feeds, Sirens & Active Alerts
+                </p>
               </button>
+
               <button
                 type="button"
                 onClick={() => setRolePreset('researcher@aquaguard.ai')}
-                className="px-2 py-1.5 rounded text-[11px] font-semibold border transition-all text-purple-300 hover:bg-purple-500/10 border-purple-500/30"
+                className="p-2 rounded-lg text-left border transition-all hover:bg-purple-500/10 border-purple-500/30 cursor-pointer group"
               >
-                Researcher
+                <div className="flex items-center gap-1 text-purple-300 font-bold text-xs mb-1">
+                  <FlaskConical size={13} />
+                  <span>Researcher</span>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  Benchmarks, NPU & Video Testing
+                </p>
               </button>
             </div>
           </div>

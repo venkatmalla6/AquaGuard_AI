@@ -1,4 +1,4 @@
-// AquaGuard AI - Native Browser Push Notification Dispatcher (Phase 11)
+﻿// AquaGuard AI - Native Browser Push Notification Dispatcher (Phase 11)
 // Provides desktop push notifications for on-duty lifeguards and operators,
 // ensuring immediate visual interruption even when the browser is minimized or tab is in background.
 
@@ -14,7 +14,14 @@ class BrowserNotificationManager {
   private enabled: boolean;
 
   constructor() {
-    const savedPref = localStorage.getItem('aquaguard_push_notifications_enabled');
+    let savedPref: string | null = null;
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined' && typeof window.localStorage.getItem === 'function') {
+      try {
+        savedPref = window.localStorage.getItem('aquaguard_push_notifications_enabled');
+      } catch {
+        savedPref = null;
+      }
+    }
     // Default to true if not explicitly disabled
     this.enabled = savedPref === null ? true : savedPref === 'true';
   }
@@ -50,7 +57,13 @@ class BrowserNotificationManager {
 
   public setEnabled(val: boolean) {
     this.enabled = val;
-    localStorage.setItem('aquaguard_push_notifications_enabled', String(val));
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined' && typeof window.localStorage.setItem === 'function') {
+      try {
+        window.localStorage.setItem('aquaguard_push_notifications_enabled', String(val));
+      } catch {
+        // ignore
+      }
+    }
   }
 
   public sendEmergencyAlert(
@@ -109,6 +122,13 @@ class BrowserNotificationManager {
       return { success: true, message: 'Desktop notification sent successfully!' };
     }
     return { success: false, message: 'Could not display desktop notification.' };
+  }
+
+  public sendWarningAlert(title: string, body: string): boolean {
+    return this.sendEmergencyAlert(title, body, {
+      requireInteraction: false,
+      tag: 'swimmer-distress-warning',
+    });
   }
 }
 

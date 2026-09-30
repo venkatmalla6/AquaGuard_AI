@@ -1,6 +1,7 @@
 ﻿import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { alertAudio } from '../utils/audioAlert';
 import { authAPI } from '../services/api';
+import { getDefaultHomeForRole } from '../App';
 
 describe('AquaGuard Authentication & Universal Logout Suite', () => {
   let store: Record<string, string> = {};
@@ -18,18 +19,24 @@ describe('AquaGuard Authentication & Universal Logout Suite', () => {
     vi.stubGlobal('window', { localStorage: mockStorage });
   });
 
+  it('should resolve correct default home station per role', () => {
+    expect(getDefaultHomeForRole('operator')).toBe('/monitoring');
+    expect(getDefaultHomeForRole('researcher')).toBe('/research');
+    expect(getDefaultHomeForRole('admin')).toBe('/dashboard');
+  });
+
   it('should store credentials on login and clear them on logout', () => {
     // Simulate login session setup
     localStorage.setItem('access_token', 'sample-jwt-token-12345');
     localStorage.setItem('user', JSON.stringify({
       id: 1,
-      email: 'admin@aquaguard.ai',
-      name: 'Safety Commander',
-      role: 'admin',
+      email: 'operator@aquaguard.ai',
+      name: 'Head Lifeguard',
+      role: 'operator',
     }));
 
     expect(localStorage.getItem('access_token')).toBe('sample-jwt-token-12345');
-    expect(localStorage.getItem('user')).toContain('Safety Commander');
+    expect(localStorage.getItem('user')).toContain('Head Lifeguard');
 
     // Perform universal logout cleanup sequence
     alertAudio.stopAll();
@@ -46,7 +53,6 @@ describe('AquaGuard Authentication & Universal Logout Suite', () => {
     expect(typeof alertAudio.toggleMute).toBe('function');
     expect(typeof alertAudio.isMuted).toBe('function');
 
-    // Executing stopAll should not throw in headless environment
     expect(() => alertAudio.stopAll()).not.toThrow();
   });
 

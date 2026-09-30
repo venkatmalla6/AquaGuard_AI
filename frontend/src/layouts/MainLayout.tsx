@@ -9,14 +9,64 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import { alertAudio } from '../utils/audioAlert';
 import { browserNotification } from '../utils/browserNotification';
 
-const navItems = [
-  { path: '/dashboard',     icon: LayoutDashboard, label: 'Dashboard',         desc: 'Real-Time Pool Safety Overview' },
-  { path: '/monitoring',    icon: Video,           label: 'Live Monitoring',    desc: 'Dual Camera Streams & YOLOV8 Inference' },
-  { path: '/video-testing', icon: Upload,          label: 'Video Testing',      desc: 'Synthetic & Offline Video Pipeline' },
-  { path: '/alerts',        icon: Bell,            label: 'Alerts & Dispatch',  desc: 'Emergency Incident Desk & Sirens' },
-  { path: '/people',        icon: Users,           label: 'People Tracking',    desc: 'Multi-Swimmer ByteTrack Trajectories' },
-  { path: '/research',      icon: FlaskConical,    label: 'Research',           desc: 'Edge vs Cloud Benchmark Suite' },
-  { path: '/system',        icon: Activity,        label: 'System',             desc: 'Hardware Health & ONNX Runtime' },
+interface NavItemConfig {
+  path: string;
+  icon: any;
+  label: string;
+  desc: string;
+  roles: string[];
+}
+
+const navItems: NavItemConfig[] = [
+  {
+    path: '/dashboard',
+    icon: LayoutDashboard,
+    label: 'Dashboard',
+    desc: 'Real-Time Pool Safety Overview',
+    roles: ['admin', 'operator', 'researcher'],
+  },
+  {
+    path: '/monitoring',
+    icon: Video,
+    label: 'Live Monitoring',
+    desc: 'Dual Camera Streams & YOLOV8 Inference',
+    roles: ['admin', 'operator'],
+  },
+  {
+    path: '/alerts',
+    icon: Bell,
+    label: 'Alerts & Dispatch',
+    desc: 'Emergency Incident Desk & Sirens',
+    roles: ['admin', 'operator'],
+  },
+  {
+    path: '/people',
+    icon: Users,
+    label: 'People Tracking',
+    desc: 'Multi-Swimmer ByteTrack Trajectories',
+    roles: ['admin', 'operator', 'researcher'],
+  },
+  {
+    path: '/video-testing',
+    icon: Upload,
+    label: 'Video Testing',
+    desc: 'Synthetic & Offline Video Pipeline',
+    roles: ['admin', 'researcher'],
+  },
+  {
+    path: '/research',
+    icon: FlaskConical,
+    label: 'Research',
+    desc: 'Edge vs Cloud Benchmark Suite',
+    roles: ['admin', 'researcher'],
+  },
+  {
+    path: '/system',
+    icon: Activity,
+    label: 'System',
+    desc: 'Hardware Health & ONNX Runtime',
+    roles: ['admin', 'researcher'],
+  },
 ];
 
 interface AlertPayload {
@@ -35,6 +85,27 @@ interface CurrentUser {
   name: string;
   role: string;
 }
+
+const roleStyles: Record<string, { badge: string; pillBorder: string; avatarBg: string; titleSub: string }> = {
+  admin: {
+    badge: 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60',
+    pillBorder: 'rgba(14, 165, 233, 0.4)',
+    avatarBg: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+    titleSub: 'Full Mission Control',
+  },
+  operator: {
+    badge: 'bg-amber-950/80 text-amber-300 border-amber-700/60',
+    pillBorder: 'rgba(245, 158, 11, 0.4)',
+    avatarBg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    titleSub: 'Lifeguard Surveillance Station',
+  },
+  researcher: {
+    badge: 'bg-purple-950/80 text-purple-300 border-purple-700/60',
+    pillBorder: 'rgba(168, 85, 247, 0.4)',
+    avatarBg: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+    titleSub: 'AI & Edge Vision Lab',
+  },
+};
 
 export default function MainLayout() {
   const location = useLocation();
@@ -72,6 +143,10 @@ export default function MainLayout() {
     }
   }, [location.pathname]);
 
+  const userRole = (user.role || 'admin').toLowerCase();
+  const visibleNavItems = navItems.filter((item) => item.roles.includes(userRole));
+  const currentRoleStyle = roleStyles[userRole] || roleStyles.admin;
+
   // Connect to global emergency alert websocket
   const wsUrl = (import.meta.env.VITE_WS_URL || 'ws://localhost:8000') + '/ws/alerts';
   const { lastMessage } = useWebSocket<AlertPayload>(wsUrl);
@@ -96,16 +171,13 @@ export default function MainLayout() {
   }, [lastMessage]);
 
   const handleLogout = () => {
-    // Silence alarms immediately
     alertAudio.stopAll();
-    // Clear user tokens and credentials
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
-    // Navigate cleanly to login page
     navigate('/login', { replace: true });
   };
 
-  const currentModule = navItems.find((item) => item.path === location.pathname) || navItems[0];
+  const currentModule = visibleNavItems.find((item) => item.path === location.pathname) || visibleNavItems[0] || navItems[0];
   const CurrentIcon = currentModule.icon;
 
   return (
@@ -122,31 +194,52 @@ export default function MainLayout() {
         >
           <div
             className="w-9 h-9 rounded-lg flex items-center justify-center shadow-md shadow-cyan-500/20"
-            style={{ background: 'linear-gradient(135deg,#0090b0,#00b5d4)' }}
+            style={{ background: currentRoleStyle.avatarBg }}
           >
             <Waves size={18} className="text-white" />
           </div>
           <div className="min-w-0">
             <p className="font-bold text-white text-sm tracking-wide">AquaGuard AI</p>
-            <p className="text-[11px] text-cyan-400 font-semibold truncate">Edge Safety Monitor</p>
+            <p className="text-[11px] text-slate-400 font-medium truncate">{currentRoleStyle.titleSub}</p>
           </div>
         </div>
 
-        {/* Nav Links */}
-        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
-          {navItems.map(({ path, icon: Icon, label }) => {
+        {/* Dynamic Nav Links filtered for active role */}
+        <div className="px-4 pt-3 pb-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            {userRole.toUpperCase()} MODULES ({visibleNavItems.length})
+          </p>
+        </div>
+
+        <nav className="flex-1 px-3 py-1 space-y-1 overflow-y-auto">
+          {visibleNavItems.map(({ path, icon: Icon, label }) => {
             const isAlerts = path === '/alerts';
             return (
               <NavLink
                 key={path}
                 to={path}
                 style={({ isActive }) =>
-                  isActive ? { background: 'rgba(0,181,212,0.12)', color: '#22d3ee' } : {}
+                  isActive
+                    ? {
+                        background:
+                          userRole === 'operator'
+                            ? 'rgba(245,158,11,0.12)'
+                            : userRole === 'researcher'
+                            ? 'rgba(168,85,247,0.12)'
+                            : 'rgba(0,181,212,0.12)',
+                        color:
+                          userRole === 'operator'
+                            ? '#fbbf24'
+                            : userRole === 'researcher'
+                            ? '#c084fc'
+                            : '#22d3ee',
+                      }
+                    : {}
                 }
                 className={({ isActive }) =>
                   'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ' +
                   (isActive
-                    ? 'text-cyan-400 font-semibold'
+                    ? 'font-semibold'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/70')
                 }
               >
@@ -169,13 +262,13 @@ export default function MainLayout() {
             className="p-2.5 rounded-lg border flex items-center justify-between"
             style={{
               background: 'rgba(15, 23, 42, 0.7)',
-              borderColor: 'rgba(51, 65, 85, 0.6)',
+              borderColor: currentRoleStyle.pillBorder,
             }}
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div
                 className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs text-white uppercase shadow-sm"
-                style={{ background: 'linear-gradient(135deg, #0ea5e9, #0369a1)' }}
+                style={{ background: currentRoleStyle.avatarBg }}
               >
                 {user.name ? user.name.charAt(0) : 'U'}
               </div>
@@ -184,8 +277,8 @@ export default function MainLayout() {
                 <p className="text-[10px] text-slate-400 truncate font-mono">{user.email}</p>
               </div>
             </div>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-cyan-950/80 text-cyan-300 border border-cyan-700/50">
-              {user.role}
+            <span className={'px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ' + currentRoleStyle.badge}>
+              {userRole}
             </span>
           </div>
 
@@ -223,7 +316,7 @@ export default function MainLayout() {
       {/* Main Content Area with Universal Top Bar */}
       <main className="flex-1 overflow-y-auto flex flex-col">
         {/* Emergency Alert Sticky Banner */}
-        {activeEmergency && location.pathname !== '/alerts' && (
+        {activeEmergency && location.pathname !== '/alerts' && userRole !== 'researcher' && (
           <div className="bg-red-600/95 text-white px-4 py-2.5 flex items-center justify-between shadow-xl animate-pulse">
             <div className="flex items-center gap-2.5 text-xs font-bold">
               <AlertTriangle size={16} />
@@ -246,7 +339,7 @@ export default function MainLayout() {
           </div>
         )}
 
-        {/* Universal Top Navigation Header (Present across EVERY Module) */}
+        {/* Universal Top Navigation Header */}
         <header
           className="h-16 px-6 border-b flex items-center justify-between flex-shrink-0 z-10 backdrop-blur-md"
           style={{
@@ -259,11 +352,25 @@ export default function MainLayout() {
             <div
               className="w-9 h-9 rounded-lg flex items-center justify-center border shadow-sm"
               style={{
-                background: 'rgba(14, 165, 233, 0.12)',
-                borderColor: 'rgba(14, 165, 233, 0.3)',
+                background:
+                  userRole === 'operator'
+                    ? 'rgba(245, 158, 11, 0.12)'
+                    : userRole === 'researcher'
+                    ? 'rgba(168, 85, 247, 0.12)'
+                    : 'rgba(14, 165, 233, 0.12)',
+                borderColor: currentRoleStyle.pillBorder,
               }}
             >
-              <CurrentIcon size={18} className="text-cyan-400" />
+              <CurrentIcon
+                size={18}
+                className={
+                  userRole === 'operator'
+                    ? 'text-amber-400'
+                    : userRole === 'researcher'
+                    ? 'text-purple-400'
+                    : 'text-cyan-400'
+                }
+              />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -281,7 +388,7 @@ export default function MainLayout() {
             </div>
           </div>
 
-          {/* Center Badges: Real-time Edge status */}
+          {/* Center Badges */}
           <div className="hidden lg:flex items-center gap-2">
             <div
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border"
@@ -315,12 +422,12 @@ export default function MainLayout() {
               className="flex items-center gap-2 px-2.5 py-1 rounded-lg border"
               style={{
                 background: 'rgba(30, 41, 59, 0.6)',
-                borderColor: 'rgba(51, 65, 85, 0.6)',
+                borderColor: currentRoleStyle.pillBorder,
               }}
             >
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[11px] text-white uppercase shadow-inner"
-                style={{ background: 'linear-gradient(135deg, #0ea5e9, #0284c7)' }}
+                style={{ background: currentRoleStyle.avatarBg }}
               >
                 {user.name ? user.name.charAt(0) : 'U'}
               </div>
@@ -328,13 +435,15 @@ export default function MainLayout() {
                 <p className="text-xs font-semibold text-white leading-tight">
                   {user.name}
                 </p>
-                <p className="text-[9px] text-cyan-400 font-mono uppercase tracking-wider">
-                  {user.role}
+                <p className={'text-[9px] font-mono uppercase tracking-wider font-bold ' + (
+                  userRole === 'operator' ? 'text-amber-400' : userRole === 'researcher' ? 'text-purple-400' : 'text-cyan-400'
+                )}>
+                  {userRole}
                 </p>
               </div>
             </div>
 
-            {/* Universal Logout Button in Top Bar */}
+            {/* Universal Logout Button */}
             <button
               id="topbar-logout-btn"
               onClick={handleLogout}
