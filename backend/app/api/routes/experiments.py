@@ -1,4 +1,7 @@
-﻿"""
+import os
+from pathlib import Path
+from pathlib import Path
+"""
 AquaGuard AI - Research Experiments Endpoints
 Manage and query academic benchmark experiments (EXP-A through EXP-E) and metrics.
 """
@@ -222,6 +225,70 @@ async def run_benchmark_suite(
 
     await session.commit()
     return {"status": "success", "message": "All 5 benchmark experiments executed and synced successfully", "results": results}
+
+
+
+@router.get("/paper-assets", summary="List Generated Publication Figures & LaTeX Tables")
+async def get_paper_assets(current_user: User = Depends(get_current_user)):
+    """Retrieve URLs, dimensions, and metadata for all publication-ready 300 DPI figures and LaTeX tables."""
+    import glob
+    root_p = Path(__file__).parent.parent.parent.parent.parent
+    fig_dir = root_p / "docs" / "paper" / "figures"
+    table_dir = root_p / "docs" / "paper" / "tables"
+
+    figures = []
+    for p in sorted(glob.glob(str(fig_dir / "*.png"))):
+        fname = os.path.basename(p)
+        base = fname.replace(".png", "")
+        pdf_name = f"{base}.pdf"
+        size_kb = round(os.path.getsize(p) / 1024, 1)
+        figures.append({
+            "id": base,
+            "filename_png": fname,
+            "filename_pdf": pdf_name,
+            "url_png": f"/paper-figures/{fname}",
+            "size_kb": size_kb,
+            "dpi": 300,
+        })
+
+    tables = []
+    for p in sorted(glob.glob(str(table_dir / "*.tex"))):
+        fname = os.path.basename(p)
+        with open(p, "r", encoding="utf-8") as tf:
+            tex_content = tf.read()
+        tables.append({
+            "id": fname.replace(".tex", ""),
+            "filename": fname,
+            "content": tex_content,
+        })
+
+    return {
+        "status": "success",
+        "figures_count": len(figures),
+        "figures": figures,
+        "tables_count": len(tables),
+        "tables": tables,
+    }
+
+
+@router.post("/generate-paper-assets", summary="Generate High-Resolution Figures and LaTeX Tables")
+async def generate_paper_assets(current_user: User = Depends(get_current_user)):
+    """Regenerates all 300 DPI publication figures and IEEE/ACM formatted LaTeX tables."""
+    from ai.evaluation.paper_visualizer import PaperVisualizer
+    from ai.evaluation.latex_tables_generator import LatexTablesGenerator
+
+    vis = PaperVisualizer()
+    figs = vis.generate_all_paper_figures()
+
+    gen = LatexTablesGenerator()
+    tabs = gen.generate_all_tables()
+
+    return {
+        "status": "success",
+        "message": "Generated 5 publication figures (300 DPI PNG & PDF) and 3 LaTeX tables successfully.",
+        "figures": figs,
+        "tables": tabs,
+    }
 
 
 @router.get("/{experiment_id}", response_model=Experiment, summary="Get Experiment Details")

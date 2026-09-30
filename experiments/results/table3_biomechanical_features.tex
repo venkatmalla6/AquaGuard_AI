@@ -1,0 +1,24 @@
+% Table 3: 16-Dimensional Biomechanical Feature Representations
+\begin{table*}[t]
+\centering
+\caption{Mathematical Definitions and Physiological Justifications of Extracted 16-D Kinematic Features}
+\label{tab:biomechanical_features}
+\begin{tabular}{llll}
+\toprule
+\textbf{Idx} & \textbf{Feature Identifier} & \textbf{Mathematical Definition} & \textbf{Biomechanical Relevance \& Citation} \\
+\midrule
+$f_0, f_1$   & $c_{x}^{\text{norm}}, c_{y}^{\text{norm}}$ & $c_x / W_{\text{frame}}, \; c_y / H_{\text{frame}}$ & Normalized spatial centroid in pool coordinate space \\
+$f_2, f_3$   & $w^{\text{norm}}, h^{\text{norm}}$         & $w / W_{\text{frame}}, \; h / H_{\text{frame}}$     & Bounding box dimensions indicating body projection \\
+$f_4$        & Aspect Ratio ($\alpha$)                    & $w / h$                                            & Horizontal swimming ($\alpha > 1.2$) vs. Vertical IDR ($\alpha < 0.6$) \\
+$f_5$        & Area Fraction ($\Omega$)                   & $(w \cdot h) / (W_{\text{frame}} \cdot H_{\text{frame}})$ & Body surface area visible above/near water plane \\
+$f_6$        & Displacement ($\delta$)                    & $\sqrt{\Delta c_x^2 + \Delta c_y^2}$               & Net horizontal progress; near zero during drowning (Pia 1974) \\
+$f_7, f_8$   & $v_x, v_y$                                 & $\Delta c_x / \Delta t, \; \Delta c_y / \Delta t$  & Velocity decomposition; $v_y > 0$ indicates vertical sinking \\
+$f_9$        & Kinematic Speed ($S$)                      & $\delta / \Delta t$                                & Locomotion speed; $< 0.15$ m/s indicates loss of propulsion \\
+$f_{10}$     & Acceleration ($a$)                         & $\Delta S / \Delta t$                              & Sudden thrashing spasms or decelerating exhaustion \\
+$f_{11}, f_{12}$ & $\sin \theta, \cos \theta$             & $\Delta c_y / \delta, \; \Delta c_x / \delta$      & Trajectory heading direction unit vector \\
+$f_{13}$     & Movement Variance ($\sigma_m^2$)           & $\frac{1}{K}\sum_{i=1}^{K} (S_i - \bar{S})^2$       & Thrashing intensity; elevated in panic distress \\
+$f_{14}$     & Vertical Ratio ($\Phi_{\text{vert}}$)      & $\max(0, 1 - \alpha)$                              & Instinctive Drowning Response (IDR) posture marker \\
+$f_{15}$     & Inactivity Index ($\mathcal{I}$)           & $1 - \min(1, S / S_{\text{thresh}})$               & Unconscious / shallow-water blackout submersion marker \\
+\bottomrule
+\end{tabular}
+\end{table*}

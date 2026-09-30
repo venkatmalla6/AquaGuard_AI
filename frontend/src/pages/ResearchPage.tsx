@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   FlaskConical, BarChart2, TrendingUp, Award, Play, RefreshCw,
-  CheckCircle2, AlertCircle, Zap, Clock, ShieldCheck, FileText
+  CheckCircle2, AlertCircle, Zap, Clock, ShieldCheck, FileText, Sparkles,
+  Image, Download, Copy, Check, Eye
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Legend, Cell, ScatterChart, Scatter, ZAxis
 } from 'recharts';
-import { experimentAPI } from '../services/api';
+import { experimentAPI, type PaperFigure, type LatexTable } from '../services/api';
 
 interface ExperimentComparisonItem {
   id: number;
@@ -41,6 +42,48 @@ export default function ResearchPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [runningBenchmarks, setRunningBenchmarks] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Phase 15: Paper Assets & Visualizations State
+  const [paperFigures, setPaperFigures] = useState<PaperFigure[]>([]);
+  const [latexTables, setLatexTables] = useState<LatexTable[]>([]);
+  const [selectedTableId, setSelectedTableId] = useState<string>("table1_model_comparison");
+  const [copiedTable, setCopiedTable] = useState<boolean>(false);
+  const [isGeneratingPaper, setIsGeneratingPaper] = useState<boolean>(false);
+
+  const fetchPaperAssets = useCallback(async () => {
+    try {
+      const res = await experimentAPI.getPaperAssets();
+      if (res.data) {
+        setPaperFigures(res.data.figures || []);
+        setLatexTables(res.data.tables || []);
+      }
+    } catch (err) {
+      console.error("Failed to load paper assets:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPaperAssets();
+  }, [fetchPaperAssets]);
+
+  const handleGeneratePaperAssets = async () => {
+    setIsGeneratingPaper(true);
+    try {
+      await experimentAPI.generatePaperAssets();
+      setNotification({ type: 'success', message: 'All 5 publication figures (300 DPI) and 3 LaTeX tables generated successfully!' });
+      await fetchPaperAssets();
+    } catch (err) {
+      setNotification({ type: 'error', message: 'Failed to generate paper assets.' });
+    } finally {
+      setIsGeneratingPaper(false);
+    }
+  };
+
+  const handleCopyLatex = (content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedTable(true);
+    setTimeout(() => setCopiedTable(false), 2000);
+  };
 
   const fetchComparisonData = useCallback(async () => {
     setLoading(true);
@@ -401,6 +444,132 @@ export default function ResearchPage() {
               </li>
             </ul>
           </div>
+        {/* PHASE 15: PUBLICATION & THESIS PAPER ASSETS GALLERY */}
+        <div className="lg:col-span-3 rounded-2xl p-5 space-y-5"
+          style={{ background: 'linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,58,138,0.25))', border: '1px solid rgba(59,130,246,0.3)' }}>
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-700/50">
+            <div>
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                <Image size={16} className="text-blue-400" /> Publication & Thesis Paper Assets (Phase 15)
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Camera-ready 300 DPI figures (PNG & PDF) and IEEE/ACM booktabs LaTeX tables for the Capstone Thesis.
+              </p>
+            </div>
+            <button
+              onClick={handleGeneratePaperAssets}
+              disabled={isGeneratingPaper}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition shadow-md shadow-blue-500/20 flex items-center gap-1.5"
+            >
+              {isGeneratingPaper ? <RefreshCw size={13} className="animate-spin" /> : <Sparkles size={13} />}
+              {isGeneratingPaper ? 'Rendering 300 DPI Figures...' : 'Regenerate Paper Assets'}
+            </button>
+          </div>
+
+          {/* Figures Gallery */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Eye size={13} className="text-cyan-400" /> High-Resolution Publication Figures (300 DPI)
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {(paperFigures.length > 0 ? paperFigures : [
+                { id: 'fig1_precision_recall_curves', filename_png: 'fig1_precision_recall_curves.png', filename_pdf: 'fig1_precision_recall_curves.pdf', url_png: '/paper-figures/fig1_precision_recall_curves.png', size_kb: 210, dpi: 300 },
+                { id: 'fig2_confusion_matrices_comparison', filename_png: 'fig2_confusion_matrices_comparison.png', filename_pdf: 'fig2_confusion_matrices_comparison.pdf', url_png: '/paper-figures/fig2_confusion_matrices_comparison.png', size_kb: 245, dpi: 300 },
+                { id: 'fig3_latency_vs_edge_throughput', filename_png: 'fig3_latency_vs_edge_throughput.png', filename_pdf: 'fig3_latency_vs_edge_throughput.pdf', url_png: '/paper-figures/fig3_latency_vs_edge_throughput.png', size_kb: 198, dpi: 300 },
+                { id: 'fig4_feature_importance_ranking', filename_png: 'fig4_feature_importance_ranking.png', filename_pdf: 'fig4_feature_importance_ranking.pdf', url_png: '/paper-figures/fig4_feature_importance_ranking.png', size_kb: 185, dpi: 300 },
+                { id: 'fig5_time_to_detect_sla_adherence', filename_png: 'fig5_time_to_detect_sla_adherence.png', filename_pdf: 'fig5_time_to_detect_sla_adherence.pdf', url_png: '/paper-figures/fig5_time_to_detect_sla_adherence.png', size_kb: 175, dpi: 300 },
+              ]).map((fig) => {
+                const title = fig.id.replace(/_/g, ' ').toUpperCase();
+                const imgUrl = `http://localhost:8000/paper-figures/${fig.id}.png`;
+                return (
+                  <div key={fig.id} className="rounded-xl overflow-hidden bg-slate-900/80 border border-slate-800 flex flex-col justify-between p-3 space-y-2.5">
+                    <div>
+                      <div className="flex items-center justify-between text-xs font-bold text-white mb-1">
+                        <span>{title}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">300 DPI</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400">Size: {fig.size_kb} KB · High Res</p>
+                    </div>
+                    <div className="rounded-lg overflow-hidden border border-slate-700/60 bg-slate-950 max-h-40 flex items-center justify-center">
+                      <img
+                        src={imgUrl}
+                        alt={title}
+                        className="object-contain max-h-40 w-full hover:scale-105 transition duration-300"
+                        onError={(e) => {
+                          // Fallback if image not yet loaded
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[11px]">
+                      <a
+                        href={imgUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1"
+                      >
+                        <Eye size={12} /> View Full
+                      </a>
+                      <a
+                        href={`http://localhost:8000/paper-figures/${fig.id}.pdf`}
+                        download
+                        className="text-slate-400 hover:text-white flex items-center gap-1"
+                      >
+                        <Download size={12} /> PDF Vector
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* LaTeX Tables Explorer */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <FileText size={13} className="text-cyan-400" /> IEEE / ACM LaTeX Booktabs Code Snippets
+              </h3>
+              {latexTables.length > 0 && (
+                <button
+                  onClick={() => {
+                    const cur = latexTables.find((t) => t.id === selectedTableId);
+                    if (cur) handleCopyLatex(cur.content);
+                  }}
+                  className="px-2.5 py-1 rounded text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-1.5"
+                >
+                  {copiedTable ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+                  {copiedTable ? 'Copied LaTeX!' : 'Copy LaTeX Code'}
+                </button>
+              )}
+            </div>
+
+            <div className="flex gap-2 border-b border-slate-800 pb-2">
+              {[
+                { id: 'table1_model_comparison', label: 'Table 1: Benchmark Comparison' },
+                { id: 'table2_edge_acceleration', label: 'Table 2: Edge CPU Acceleration' },
+                { id: 'table3_biomechanical_features', label: 'Table 3: 16-D Feature Definitions' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedTableId(tab.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
+                    selectedTableId === tab.id
+                      ? 'bg-blue-600/20 text-blue-300 border-blue-500/50'
+                      : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-850'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-950 font-mono text-[11px] text-slate-300 overflow-x-auto max-h-56 border border-slate-800/80">
+              <pre>{latexTables.find((t) => t.id === selectedTableId)?.content || '% Select a table to view LaTeX booktabs source code...'}</pre>
+            </div>
+          </div>
+        </div>
+
         </div>
       </div>
     </div>

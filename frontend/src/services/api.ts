@@ -128,6 +128,30 @@ export interface ScenarioEvaluationResponse {
   };
 }
 
+
+export interface PaperFigure {
+  id: string;
+  filename_png: string;
+  filename_pdf: string;
+  url_png: string;
+  size_kb: number;
+  dpi: number;
+}
+
+export interface LatexTable {
+  id: string;
+  filename: string;
+  content: string;
+}
+
+export interface PaperAssetsResponse {
+  status: string;
+  figures_count: number;
+  figures: PaperFigure[];
+  tables_count: number;
+  tables: LatexTable[];
+}
+
 export const authAPI = {
   login: (email: string, password: string) => api.post('/api/auth/login', { email, password }),
   logout: () => api.post('/api/auth/logout'),
@@ -155,11 +179,13 @@ export const alertAPI = {
 };
 
 export const experimentAPI = {
-  list:          () => api.get('/api/experiments'),
-  create:        (data: Record<string, unknown>) => api.post('/api/experiments', data),
-  getMetrics:    (id: number) => api.get(`/api/experiments/${id}/metrics`),
-  getComparison: () => api.get('/api/experiments/comparison'),
-  runAll:        () => api.post('/api/experiments/run-all'),
+  list:                () => api.get('/api/experiments'),
+  create:              (data: Record<string, unknown>) => api.post('/api/experiments', data),
+  getMetrics:          (id: number) => api.get(`/api/experiments/${id}/metrics`),
+  getComparison:       () => api.get('/api/experiments/comparison'),
+  runAll:              () => api.post('/api/experiments/run-all'),
+  getPaperAssets:      () => api.get<PaperAssetsResponse>('/api/experiments/paper-assets'),
+  generatePaperAssets: () => api.post('/api/experiments/generate-paper-assets'),
 };
 
 export const videoAPI = {

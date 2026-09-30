@@ -292,24 +292,30 @@
 
 ---
 
+## Phase 15: Paper Assets & Visualizations [COMPLETE]
+
+- [x] Publication-Quality Vector/High-Res Figures Generator:
+  - Generates 5 publication-ready 300 DPI figures saved as both PNG and vector PDF in docs/paper/figures/
+  - fig1_precision_recall_curves: PR curves across EXP-A, EXP-B, EXP-C (AUC=0.991)
+  - fig2_confusion_matrices_comparison: 3-panel normalized confusion matrices (0% FN on Drowning)
+  - fig3_latency_vs_edge_throughput: PyTorch vs TorchScript vs ONNX Runtime CPU benchmark
+  - fig4_feature_importance_ranking: 16-D biomechanical feature attribution ranking
+  - fig5_time_to_detect_sla_adherence: Boxplot of TTD vs 2.50s AES safety SLA
+- [x] IEEE/ACM LaTeX Table Generator:
+  - table1_model_comparison.tex: Performance metrics across EXP-A to EXP-E
+  - table2_edge_acceleration.tex: CPU engine comparison (PyTorch, TorchScript, ONNX Runtime)
+  - table3_biomechanical_features.tex: 16-D feature mathematical formulations and citations
+- [x] Paper Assets Backend REST API:
+  - GET /api/experiments/paper-assets and POST /api/experiments/generate-paper-assets
+  - Static mount /paper-figures in backend/app/main.py
+- [x] Interactive Paper Gallery UI:
+  - 300 DPI figures gallery, vector PDF download, LaTeX code viewer and copy
+- [x] Automated Test Suite (tests/test_paper_assets.py): 4/4 passing
+
+---
+
 ## Future Phases
 
-- Phase 15: Paper Assets & Visualizations
-- Phase 16: Documentation & B.Tech Defense Pack
-
-
-- Phase 15: Paper Assets & Visualizations
-- Phase 16: Documentation & B.Tech Defense Pack
-
-
-
-- Phase 15: Paper Assets & Visualizations
-- Phase 16: Documentation & B.Tech Defense Pack
-
-
-
-
-- Phase 15: Paper Assets & Visualizations
 - Phase 16: Documentation & B.Tech Defense Pack
 
 ---

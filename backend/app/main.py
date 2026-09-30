@@ -191,6 +191,11 @@ synthetic_dir = Path("./data/synthetic_videos")
 synthetic_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/synthetic", StaticFiles(directory=str(synthetic_dir)), name="synthetic")
 
+# Publication figures store
+paper_fig_dir = Path("./docs/paper/figures")
+paper_fig_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/paper-figures", StaticFiles(directory=str(paper_fig_dir)), name="paper-figures")
+
 
 # ============================================================
 # WebSocket Endpoints (Enhanced - Phase 9 Live Streaming)

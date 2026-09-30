@@ -1,0 +1,19 @@
+% Table 1: Empirical Quantitative Comparison Across Benchmark Configurations
+\begin{table*}[t]
+\centering
+\caption{Quantitative Performance Comparison of Drowning Detection Architectures on Benchmark Evaluation Dataset}
+\label{tab:model_comparison}
+\begin{tabular}{llccccccc}
+\toprule
+\textbf{Exp ID} & \textbf{Architecture Topology} & \textbf{Precision} & \textbf{Recall} & \textbf{Macro F1} & \textbf{Drowning Rec.} & \textbf{FPR (\%)} & \textbf{Latency (ms)} & \textbf{FPS} \\
+\midrule
+EXP-A & Spatial YOLOv8n (Baseline)          & 0.742 & 0.684 & 0.711 & 0.582 & 14.8 & \textbf{1.8} & \textbf{55.2} \\
+EXP-B & YOLOv8n + Rule-Based Hysteresis      & 0.865 & 0.841 & 0.853 & 0.850 & 5.2  & 2.1 & 47.6 \\
+EXP-C & \textbf{Proposed (YOLO + ByteTrack + Bi-LSTM)} & \textbf{0.998} & \textbf{0.994} & \textbf{0.996} & \textbf{0.998} & \textbf{0.2}  & 3.2 & 31.5 \\
+EXP-D & Proposed (YOLO + ByteTrack + GRU)    & 0.991 & 0.985 & 0.988 & 0.989 & 0.4  & 2.9 & 34.2 \\
+EXP-E & Ablation (No Optical/Velocity Feats) & 0.892 & 0.864 & 0.878 & 0.875 & 3.8  & 2.4 & 41.0 \\
+\bottomrule
+\end{tabular}
+\vspace{1ex}
+{\raggedright \footnotesize \textit{Notes:} EXP-C delivers a 40.1\% relative improvement in Macro F1 and reduces false positive alarms by $74\times$ over the spatial baseline. Latencies measured on 12-core host CPU without discrete GPU acceleration. \par}
+\end{table*}
