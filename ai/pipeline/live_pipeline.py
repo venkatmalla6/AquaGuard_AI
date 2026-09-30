@@ -21,6 +21,10 @@ if root_dir not in sys.path:
 from ai.tracking.tracker import PersonTracker, TrackResult
 from ai.features.feature_extractor import TrackFeatureExtractor, FrameData
 from ai.evaluation.alert_engine import AlertEngine, AlertLevel
+from ai.optimization.edge_inference import EdgeLSTMInference
+from ai.optimization.frame_skipper import AdaptiveFrameSkipper
+from ai.optimization.cv_optimizer import OpenCVOptimizer
+
 
 
 # ============================================================
@@ -74,10 +78,28 @@ class FeatureScorer:
         "vertical_ratio":14,"inactivity":15,
     }
 
-    def __init__(self, lstm_model=None):
+    def __init__(self, lstm_model=None, edge_backend: str = 'onnx'):
         self.lstm_model = lstm_model
+        self.edge_backend = edge_backend
+        self.edge_engine = None
+        if edge_backend and edge_backend.lower() != 'rules':
+            try:
+                self.edge_engine = EdgeLSTMInference(backend=edge_backend)
+            except Exception as e:
+                logger.warning(f'Failed to load EdgeLSTMInference ({e}), using rules fallback.')
 
-    def score(self, feature_vector: np.ndarray):
+    def score(self, feature_vector: np.ndarray, sequence: Optional[np.ndarray] = None):
+        if self.edge_engine is not None:
+            if sequence is not None and sequence.ndim == 2 and sequence.shape[0] >= 5:
+                if sequence.shape[0] < 30:
+                    pad = np.tile(sequence[-1:], (30 - sequence.shape[0], 1))
+                    seq_in = np.vstack([sequence, pad])
+                else:
+                    seq_in = sequence[-30:]
+                return self.edge_engine.score_single(seq_in)
+            else:
+                seq_in = np.tile(feature_vector, (30, 1))
+                return self.edge_engine.score_single(seq_in)
         if self.lstm_model is not None:
             return self._score_lstm(feature_vector)
         return self._score_rules(feature_vector)
@@ -148,22 +170,37 @@ class LivePipeline:
     Per-frame call:  result = pipeline.process_frame(frame, frame_number)
     Broadcast:       pipeline.to_broadcast_dict(result)  -> JSON-safe dict
     """
-    def __init__(self, conf_threshold=0.35, sequence_length=32, lstm_model_path=None):
+    def __init__(
+        self,
+        conf_threshold=0.35,
+        sequence_length=32,
+        lstm_model_path=None,
+        edge_backend: str = 'onnx',
+        enable_frame_skipping: bool = True,
+        target_fps: float = 30.0
+    ):
         self.conf_threshold  = conf_threshold
         self.sequence_length = sequence_length
         self.tracker         = PersonTracker(confidence=conf_threshold)
-        self.scorer          = FeatureScorer()
+        self.scorer          = FeatureScorer(edge_backend=edge_backend)
         self.alert_engine    = AlertEngine(
             distress_confidence=0.55,
             drowning_confidence=0.75,
             consecutive_frames=5,
             cooldown_seconds=30,
         )
+        self.frame_skipper   = AdaptiveFrameSkipper(
+            target_fps=target_fps,
+            enabled=enable_frame_skipping
+        )
+        self.cv_opt_info     = OpenCVOptimizer.apply_optimizations()
         self._extractors: Dict[int, TrackFeatureExtractor] = {}
+        self._last_track_results: List[TrackFeatureResult] = []
         self._total_frames  = 0
         self._total_alerts  = 0
         self._start_time    = 0.0
         self._is_running    = False
+        self._has_active_threat = False
         if lstm_model_path:
             self._load_lstm(lstm_model_path)
 
@@ -200,6 +237,24 @@ class LivePipeline:
         self._total_frames += 1
         h, w = frame.shape[:2]
         output_frame = frame.copy() if annotate else None
+
+        should_process, current_stride = self.frame_skipper.should_process_frame(
+            frame_number=frame_number,
+            active_threat=self._has_active_threat,
+            track_count=len(self._extractors)
+        )
+        if not should_process and self._last_track_results:
+            proc_ms = round((time.perf_counter() - t0) * 1000, 2)
+            self.frame_skipper.record_latency(proc_ms)
+            if annotate and output_frame is not None:
+                for tfr in self._last_track_results:
+                    self._annotate_track(output_frame, tfr)
+                self._draw_hud(output_frame, frame_number, len(self._last_track_results), self._has_active_threat, w)
+            return FrameResult(
+                frame_number=frame_number, timestamp=ts, tracks=self._last_track_results,
+                alert_count=sum(1 for t in self._last_track_results if t.alert),
+                processing_ms=proc_ms,
+                annotated_frame=output_frame)
 
         tracks, _ = self.tracker.track(frame, frame_number=frame_number)
         track_results: List[TrackFeatureResult] = []
@@ -239,6 +294,11 @@ class LivePipeline:
             track_results.append(tfr)
             if annotate and output_frame is not None:
                 self._annotate_track(output_frame, tfr)
+
+        self._has_active_threat = frame_has_alert
+        self._last_track_results = track_results
+        elapsed_ms = round((time.perf_counter() - t0) * 1000, 1)
+        self.frame_skipper.record_latency(elapsed_ms)
 
         # Prune stale extractors
         active_ids = {t.track_id for t in tracks}
@@ -320,7 +380,12 @@ class LivePipeline:
             "active_tracks": len(self._extractors),
             "uptime_seconds":round(uptime,1),
             "session_fps":   round(self._total_frames/max(uptime,0.001),1),
-            "scorer_mode":   "lstm" if self.scorer.lstm_model else "rule-based",
+            "scorer_mode":   getattr(getattr(self.scorer, "edge_engine", None), "active_backend", "rule-based"),
+            "edge_acceleration": {
+                "active_backend": getattr(getattr(self.scorer, "edge_engine", None), "active_backend", "rules"),
+                "frame_skipping": self.frame_skipper.get_status_dict(),
+                "opencv_optimizations": self.cv_opt_info,
+            }
         }
 
     def to_broadcast_dict(self, result: FrameResult):

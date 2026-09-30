@@ -215,9 +215,41 @@
 
 ---
 
+## Phase 12: Edge Optimization (CPU Focus) [COMPLETE]
+
+- [x] TorchScript JIT Export (`ai/models/registry/behavior_lstm.torchscript.pt` - 847.4 KB)
+- [x] ONNX Runtime Export with Dynamic Batching (`ai/models/registry/behavior_lstm.onnx` - 845.5 KB)
+- [x] Numerical Parity Verification (PyTorch vs TorchScript diff = 0.0, PyTorch vs ONNX diff = 9.54e-07)
+- [x] Edge LSTM Inference Engine (`ai/optimization/edge_inference.py`):
+  - Batch 1 Latency: 1.24 ms (804 seq/s)
+  - Batch 4 Latency: 1.40 ms (2,855 seq/s, 3.58x speedup over PyTorch eager)
+- [x] Risk-Sensitive Adaptive Frame Skipper (`ai/optimization/frame_skipper.py`):
+  - 66.7% CPU savings during idle/calm monitoring (stride 3)
+  - Instant snap to stride 1 (0 frames skipped) during active distress/drowning
+- [x] OpenCV SIMD & Multi-Threading Optimization (`ai/optimization/cv_optimizer.py`):
+  - AVX2/SIMD acceleration active
+  - Multi-threaded worker pool configured to host CPU cores
+- [x] Pipeline Integration (`ai/pipeline/live_pipeline.py`):
+  - Live ONNX behavior scoring + adaptive frame skipping in telemetry stream
+- [x] Backend Edge Diagnostics API (`backend/app/api/routes/system.py`):
+  - `GET /api/system/edge`: Real-time edge configuration and model registry
+  - `POST /api/system/edge/configure`: Engine hot-swapping (ONNX/TorchScript/PyTorch)
+  - `POST /api/system/edge/benchmark`: Multi-batch CPU benchmark execution
+  - `POST /api/system/edge/export-models`: Automatic regeneration and verification
+- [x] Frontend System & Edge Acceleration Dashboard (`frontend/src/pages/SystemPage.tsx`):
+  - Engine selector, frame skipping toggle, SIMD status, live benchmark bar chart
+- [x] Automated Test Suite (`scripts/test_phase12.py`) - All 5 tests passed
+
+---
+
 ## Future Phases
 
-- Phase 12: Edge Optimization (CPU Focus)
+- Phase 13: Comprehensive Testing Suite
+- Phase 14: Synthetic Data & Scenarios Engine
+- Phase 15: Paper Assets & Visualizations
+- Phase 16: Documentation & B.Tech Defense Pack
+
+
 - Phase 13: Comprehensive Testing Suite
 - Phase 14: Synthetic Data & Scenarios Engine
 - Phase 15: Paper Assets & Visualizations

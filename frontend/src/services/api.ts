@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
@@ -25,6 +25,67 @@ api.interceptors.response.use(
 
 export default api;
 
+export interface EdgeConfigPayload {
+  engine: 'onnx' | 'torchscript' | 'pytorch';
+  enable_frame_skipping: boolean;
+  target_fps: number;
+}
+
+export interface EdgeStatusResponse {
+  status: string;
+  active_engine: 'onnx' | 'torchscript' | 'pytorch';
+  available_engines: string[];
+  frame_skipping: {
+    enabled: boolean;
+    target_fps: number;
+    idle_stride: number;
+    max_stride: number;
+    estimated_cpu_saving_idle_pct: number;
+  };
+  opencv_acceleration: {
+    use_optimized: boolean;
+    num_threads: number;
+    opencl_available: boolean;
+    build_info_simd: string;
+    cpu_threads_configured: number;
+  };
+  hardware_concurrency: {
+    logical_cores: number;
+    physical_cores: number;
+    cpu_percent: number;
+  };
+  models: {
+    onnx: { available: boolean; size_kb: number; path: string };
+    torchscript: { available: boolean; size_kb: number; path: string };
+    pytorch: { available: boolean; size_kb: number; path: string };
+  };
+}
+
+export interface BenchmarkMetrics {
+  mean_ms: number;
+  std_ms: number;
+  p50_ms: number;
+  p95_ms: number;
+  p99_ms: number;
+  min_ms: number;
+  max_ms: number;
+  throughput_samples_per_sec: number;
+  speedup_vs_pytorch: number;
+}
+
+export interface BenchmarkResponse {
+  status: string;
+  benchmark: {
+    benchmark_date: string;
+    iterations: number;
+    results: Record<string, Record<string, BenchmarkMetrics>>;
+    summary: {
+      recommended_backend: string;
+      tested_backends: string[];
+    };
+  };
+}
+
 export const authAPI = {
   login: (email: string, password: string) => api.post('/api/auth/login', { email, password }),
   logout: () => api.post('/api/auth/logout'),
@@ -32,6 +93,13 @@ export const authAPI = {
 
 export const systemAPI = {
   health: () => api.get('/health'),
+  getStatus: () => api.get('/api/system/status'),
+  getConfig: () => api.get('/api/system/config'),
+  getEdgeStatus: () => api.get<EdgeStatusResponse>('/api/system/edge'),
+  configureEdge: (payload: EdgeConfigPayload) => api.post('/api/system/edge/configure', payload),
+  runBenchmark: (iterations: number = 25, batch_sizes: number[] = [1, 4, 16]) =>
+    api.post<BenchmarkResponse>('/api/system/edge/benchmark', { iterations, batch_sizes }),
+  exportModels: () => api.post('/api/system/edge/export-models'),
 };
 
 export const alertAPI = {
