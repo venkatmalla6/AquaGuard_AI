@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Multi-Channel Alert Notification & Dispatch Engine (Phase 11)
 Handles instantaneous emergency dispatch across multiple protocols:
   1. Real-time WebSocket Push (/ws/alerts)

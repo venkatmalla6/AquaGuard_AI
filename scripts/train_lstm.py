@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 AquaGuard AI - LSTM Training Script
 Phase 7: LSTM Training Pipeline

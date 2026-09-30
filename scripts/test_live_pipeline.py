@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 AquaGuard AI - Phase 6 Integration Test
 Tests: TrackFeatureExtractor (16-D), FeatureScorer, AlertEngine, broadcast dict

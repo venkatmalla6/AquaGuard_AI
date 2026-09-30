@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Camera Management Endpoints
 CRUD operations for physical CCTV feeds, RTSP streams, and webcams.
 """

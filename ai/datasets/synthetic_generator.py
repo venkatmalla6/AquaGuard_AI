@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Synthetic Dataset Generator
 Phase 7: LSTM Training Pipeline
 

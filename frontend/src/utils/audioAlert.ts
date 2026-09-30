@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - Web Audio API Siren & Alert Synthesizer (Phase 9)
+// AquaGuard AI - Web Audio API Siren & Alert Synthesizer (Phase 9)
 // Generates emergency audio alarms directly in-browser without external MP3 assets
 
 class AlertAudioSynthesizer {

@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 AquaGuard AI - Automated Research Benchmark Runner (Phase 10)
 Executes the empirical benchmark suite (EXP-A through EXP-E), computes

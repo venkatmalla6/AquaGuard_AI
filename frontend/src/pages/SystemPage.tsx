@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - System Page (Phase 12: Edge Optimization & Hardware Acceleration)
+// AquaGuard AI - System Page (Phase 12: Edge Optimization & Hardware Acceleration)
 import { useEffect, useState } from 'react';
 import {
   Server, Cpu, HardDrive, Zap, Database, RefreshCw,

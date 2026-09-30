@@ -1,4 +1,4 @@
-﻿# AquaGuard AI — Project Plan
+# AquaGuard AI — Project Plan
 
 > **Real-Time Drowning Detection Using Person Tracking and Temporal Behavior Analysis with Edge AI**
 > B.Tech CSE Final-Year Research Project & Prototype

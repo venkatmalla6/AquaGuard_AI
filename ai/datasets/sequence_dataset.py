@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - PyTorch Sequence Dataset
 Phase 7: LSTM Training Pipeline
 

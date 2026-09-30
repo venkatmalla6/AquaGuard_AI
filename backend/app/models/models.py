@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Database Models (SQLModel)
 
 WHY one file initially: Keeps the model graph visible in one place during development.

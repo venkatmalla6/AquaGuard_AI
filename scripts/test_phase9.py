@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Phase 9 Verification Script
 Validates:
 1. FastAPI app initialization with all routers

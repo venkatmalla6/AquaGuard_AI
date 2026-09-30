@@ -1,4 +1,4 @@
-﻿# AquaGuard AI - Live Detection Pipeline
+# AquaGuard AI - Live Detection Pipeline
 # Phase 6: Live Tracking + 16-D Feature Integration
 """
 Architecture:

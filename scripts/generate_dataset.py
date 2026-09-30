@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 AquaGuard AI - Dataset Generation Script
 Phase 7: Generates synthetic training data

@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - People Tracking & Movement Telemetry Page (Phase 9)
+// AquaGuard AI - People Tracking & Movement Telemetry Page (Phase 9)
 // Multi-person track trajectory mapping, 2D pool radar, posture aspect ratio analysis
 import { useState, useEffect, useRef } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';

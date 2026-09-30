@@ -1,4 +1,4 @@
-﻿"""
+"""
 Entry point for running the AquaGuard AI backend.
 Run: python run.py
 """

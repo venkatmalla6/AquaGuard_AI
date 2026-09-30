@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - Enhanced WebSocket Hook (Phase 8)
+// AquaGuard AI - Enhanced WebSocket Hook (Phase 8)
 // Supports multiple WS channels + message history + typed events
 import { useEffect, useRef, useState, useCallback } from 'react';
 

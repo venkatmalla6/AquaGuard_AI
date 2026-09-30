@@ -1,4 +1,4 @@
-﻿# AquaGuard AI
+# AquaGuard AI
 
 ## Real-Time Drowning Detection Using Person Tracking and Temporal Behavior Analysis with Edge AI
 

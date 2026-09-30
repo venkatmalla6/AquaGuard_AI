@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - Research & Empirical Benchmark Suite (Phase 10)
+// AquaGuard AI - Research & Empirical Benchmark Suite (Phase 10)
 // Complete evaluation of EXP-A through EXP-E with interactive Recharts, confusion matrix, and live runner
 import { useState, useEffect, useCallback } from 'react';
 import {

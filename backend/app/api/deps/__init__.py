@@ -1,1 +1,1 @@
-﻿# AquaGuard AI
+# AquaGuard AI

@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 AquaGuard AI - Experiment Comparison Report
 Phase 7: Generates a side-by-side comparison table of all experiment runs.

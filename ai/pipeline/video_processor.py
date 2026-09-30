@@ -1,4 +1,4 @@
-﻿# AquaGuard AI - Video File Processor
+# AquaGuard AI - Video File Processor
 # Phase 6 Upgrade: 16-D Feature Integration
 """
 Processes a video file frame-by-frame using:

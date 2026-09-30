@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Authentication & Dependency Injection
 Provides direct bcrypt password hashing, JWT generation, and FastAPI user/role dependencies.
 """

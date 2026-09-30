@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - Video Testing Page (Phase 9)
+// AquaGuard AI - Video Testing Page (Phase 9)
 // Drag-and-drop video upload, AI processing queue, and HTML5 video streaming player
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {

@@ -1,4 +1,4 @@
-﻿import type { BehaviorClass } from '../../types';
+import type { BehaviorClass } from '../../types';
 
 const config: Record<BehaviorClass, { label: string; color: string; bg: string; border: string }> = {
   normal:             { label: 'NORMAL',   color: '#22c55e', bg: 'rgba(34,197,94,0.1)',  border: 'rgba(34,197,94,0.3)' },

@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 AquaGuard AI - Activate Trained LSTM in Live Pipeline
 Copies best_model.pt to ai/models/registry/ so LivePipeline auto-loads it.

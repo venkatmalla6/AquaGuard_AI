@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Video Ingestion & Processing Automated Test
 Generates synthetic swimmer video, uploads via REST API, triggers inference,
 and verifies progress tracking and completed output.

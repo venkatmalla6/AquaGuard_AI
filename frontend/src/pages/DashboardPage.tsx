@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - Dashboard Page (Phase 8)
+// AquaGuard AI - Dashboard Page (Phase 8)
 // Live WebSocket data: metrics + pipeline status + alert summary
 import { useEffect, useState } from 'react';
 import { Users, Bell, Zap, Clock, Wifi, WifiOff, Activity, AlertTriangle } from 'lucide-react';

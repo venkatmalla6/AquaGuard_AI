@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - FastAPI Application Entry Point
 
 This is the main application file. It:
@@ -26,6 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 # Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from app.core.config import settings

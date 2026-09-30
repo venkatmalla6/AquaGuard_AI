@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import api, { authAPI, systemAPI, alertAPI, experimentAPI } from '../services/api';
 
 describe('AquaGuard Frontend API Client', () => {

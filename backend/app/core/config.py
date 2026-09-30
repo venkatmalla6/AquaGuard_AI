@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Core Configuration
 Loads settings from environment variables and config.yaml.
 """

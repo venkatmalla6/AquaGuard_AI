@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Phase 10 Verification Script
 Validates:
 1. BenchmarkSuite engine execution across EXP-A to EXP-E

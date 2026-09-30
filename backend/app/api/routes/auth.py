@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Authentication Endpoints
 Handles user login, logout, and profile retrieval.
 """

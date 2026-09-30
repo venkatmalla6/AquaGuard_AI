@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Phase 12 Verification Suite: Edge Optimization (CPU Focus)
 Validates TorchScript/ONNX exports, edge inference latency, adaptive frame skipping,
 OpenCV SIMD acceleration, and FastAPI edge diagnostics endpoints.

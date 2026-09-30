@@ -1,4 +1,4 @@
-﻿// AquaGuard AI - Live Monitoring Page (Phase 8)
+// AquaGuard AI - Live Monitoring Page (Phase 8)
 // Real-time WebSocket-driven track visualisation + feature vector display
 import { useEffect, useState, useRef } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';

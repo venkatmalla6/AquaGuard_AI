@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - YOLOv8 Person Detector
 Wraps Ultralytics YOLOv8 for person detection (class 0).
 """

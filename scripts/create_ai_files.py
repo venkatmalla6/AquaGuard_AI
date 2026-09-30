@@ -1,4 +1,4 @@
-﻿import os, pathlib
+import os, pathlib
 
 base = pathlib.Path(r"D:\Btech\PROJECTS\AquaGuard_AI")
 

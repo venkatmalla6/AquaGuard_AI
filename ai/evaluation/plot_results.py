@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Plot Training Results
 Phase 7: Generates paper-ready matplotlib figures from training history
 

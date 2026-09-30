@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Database Setup
 Uses SQLModel (SQLAlchemy + Pydantic) with async support.
 

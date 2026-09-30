@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Evaluation Metrics
 Phase 7: LSTM Training Pipeline
 

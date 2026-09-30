@@ -1,4 +1,4 @@
-﻿import pathlib
+import pathlib
 
 base = pathlib.Path(r'D:\Btech\PROJECTS\AquaGuard_AI\frontend\src')
 

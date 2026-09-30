@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - Automated Research Benchmark Suite (Phase 10)
 Standardized academic evaluation engine for EXP-A through EXP-E:
   - EXP-A: Baseline Spatial YOLOv8n (Frame-level aspect ratio & stillness heuristics)

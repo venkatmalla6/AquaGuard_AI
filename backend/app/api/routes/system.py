@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - System Diagnostics, Hardware Telemetry & Edge AI Optimization Endpoints (Phase 12)
 Provides real-time host resource utilization, edge inference health,
 ONNX/TorchScript hardware acceleration, and dynamic benchmark suite.

@@ -1,4 +1,4 @@
-﻿"""
+"""
 AquaGuard AI - LSTM Trainer
 Phase 7: LSTM Training Pipeline
 
