@@ -1,4 +1,4 @@
-// AquaGuard AI - Web Audio API Siren & Alert Synthesizer (Phase 9)
+﻿// AquaGuard AI - Web Audio API Siren & Alert Synthesizer (Phase 9)
 // Generates emergency audio alarms directly in-browser without external MP3 assets
 
 class AlertAudioSynthesizer {
@@ -10,15 +10,24 @@ class AlertAudioSynthesizer {
   private muted = false;
 
   constructor() {
-    this.muted = localStorage.getItem('aquaguard_audio_muted') === 'true';
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+      try {
+        this.muted = window.localStorage.getItem('aquaguard_audio_muted') === 'true';
+      } catch {
+        this.muted = false;
+      }
+    }
   }
 
   private initContext() {
+    if (typeof window === 'undefined') return;
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      this.ctx = new AudioCtx();
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
     }
-    if (this.ctx.state === 'suspended') {
+    if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
   }
@@ -29,7 +38,13 @@ class AlertAudioSynthesizer {
 
   public setMuted(muted: boolean) {
     this.muted = muted;
-    localStorage.setItem('aquaguard_audio_muted', String(muted));
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+      try {
+        window.localStorage.setItem('aquaguard_audio_muted', String(muted));
+      } catch {
+        // ignore
+      }
+    }
     if (muted && this.isPlaying) {
       this.stopSiren();
     }
@@ -103,6 +118,10 @@ class AlertAudioSynthesizer {
     } catch {
       this.isPlaying = false;
     }
+  }
+
+  public stopAll() {
+    this.stopSiren();
   }
 
   public playWarningChime() {

@@ -1,4 +1,4 @@
-"""
+﻿"""
 AquaGuard AI - Authentication & Authorization Unit Tests
 """
 import pytest
@@ -15,7 +15,7 @@ async def test_login_success(unauth_client: AsyncClient):
     if response.status_code != 200:
         response = await unauth_client.post(
             "/api/auth/login",
-            json={"email": "admin@aquaguard.ai", "password": "admin123"}
+            json={"email": "admin@aquaguard.ai", "password": "demo1234"}
         )
     assert response.status_code == 200
     data = response.json()

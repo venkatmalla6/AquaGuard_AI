@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import MainLayout from './layouts/MainLayout';
 import LoadingSpinner from './components/common/LoadingSpinner';
@@ -14,7 +14,7 @@ const ResearchPage = lazy(() => import('./pages/ResearchPage'));
 const SystemPage = lazy(() => import('./pages/SystemPage'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const token = localStorage.getItem('access_token') || 'demo-mode';
+  const token = localStorage.getItem('access_token');
   if (!token) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
