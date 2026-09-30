@@ -91,3 +91,6 @@ class AlertEngine:
         }
         logger.warning(f"ALERT [{level.value.upper()}] Track {track_id} - {behavior}")
         return alert
+
+    def reset(self):
+        self._track_states.clear()

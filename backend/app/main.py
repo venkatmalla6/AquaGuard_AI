@@ -176,7 +176,7 @@ async def root():
 # ============================================================
 # These will be uncommented as each phase is implemented:
 #
-from app.api.routes import auth, cameras, alerts, experiments, system, videos
+from app.api.routes import auth, cameras, alerts, experiments, system, videos, scenarios
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(cameras.router, prefix="/api/cameras", tags=["Cameras"])
@@ -184,6 +184,12 @@ app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts"])
 app.include_router(experiments.router, prefix="/api/experiments", tags=["Experiments"])
 app.include_router(system.router, prefix="/api/system", tags=["System"])
 app.include_router(videos.router, prefix="/api/videos", tags=["Videos"])
+app.include_router(scenarios.router, prefix="/api/scenarios", tags=["Scenarios"])
+
+# Synthetic scenarios video store
+synthetic_dir = Path("./data/synthetic_videos")
+synthetic_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/synthetic", StaticFiles(directory=str(synthetic_dir)), name="synthetic")
 
 
 # ============================================================

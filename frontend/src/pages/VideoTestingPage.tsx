@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Upload, Film, Play, Trash2, RefreshCw, AlertCircle, CheckCircle2,
-  Clock, Cpu, Eye, Layers
+  Clock, Cpu, Eye, Layers, Sparkles, Activity, ShieldCheck, Video
 } from 'lucide-react';
-import { videoAPI } from '../services/api';
+import { videoAPI, scenarioAPI, type ScenarioItem, type ScenarioEvaluationResponse } from '../services/api';
 import type { VideoItem } from '../types';
 
 export default function VideoTestingPage() {
@@ -22,6 +22,62 @@ export default function VideoTestingPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Phase 14: Synthetic Scenario Engine State
+  const [scenarios, setScenarios] = useState<ScenarioItem[]>([]);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>("instinctive_drowning");
+  const [scenarioDuration, setScenarioDuration] = useState<number>(8.0);
+  const [distressOnset, setDistressOnset] = useState<number>(2.5);
+  const [isEvaluatingScenario, setIsEvaluatingScenario] = useState<boolean>(false);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState<boolean>(false);
+  const [scenarioEvalResult, setScenarioEvalResult] = useState<ScenarioEvaluationResponse | null>(null);
+
+  useEffect(() => {
+    scenarioAPI.list().then((res) => {
+      if (res.data?.scenarios) {
+        setScenarios(res.data.scenarios);
+      }
+    }).catch((err) => console.error("Failed to load scenarios:", err));
+  }, []);
+
+  const handleEvaluateScenario = async () => {
+    setIsEvaluatingScenario(true);
+    setError(null);
+    try {
+      const res = await scenarioAPI.evaluate({
+        scenario_type: selectedScenarioId,
+        duration_seconds: scenarioDuration,
+        distress_onset_second: distressOnset,
+        edge_backend: "onnx",
+      });
+      setScenarioEvalResult(res.data);
+      setSuccessMsg(`Evaluated scenario: ${res.data.scenario}. TTD: ${res.data.summary.time_to_detect_seconds ?? "N/A"}s`);
+    } catch (err) {
+      setError("Failed to evaluate scenario. Check backend logs.");
+    } finally {
+      setIsEvaluatingScenario(false);
+    }
+  };
+
+  const handleGenerateSyntheticVideo = async () => {
+    setIsGeneratingVideo(true);
+    setError(null);
+    try {
+      const res = await scenarioAPI.generate({
+        scenario_type: selectedScenarioId,
+        duration_seconds: scenarioDuration,
+        num_swimmers: selectedScenarioId === "multi_swimmer_crowd" ? 4 : 1,
+        distress_onset_second: distressOnset,
+        render_video: true,
+      });
+      setSuccessMsg(`Synthetic MP4 generated successfully! Size: ${res.data.rendered_video?.size_mb} MB.`);
+      await fetchVideos();
+    } catch (err) {
+      setError("Failed to render synthetic video. Check backend logs.");
+    } finally {
+      setIsGeneratingVideo(false);
+    }
+  };
 
   const fetchVideos = useCallback(async () => {
     try {
@@ -538,6 +594,162 @@ export default function VideoTestingPage() {
             )}
           </div>
         </div>
+      {/* PHASE 14: SYNTHETIC DATA & SCENARIO ENGINE */}
+      <div className="rounded-xl p-4 space-y-4"
+        style={{ background: 'linear-gradient(135deg, rgba(15,23,42,0.9), rgba(15,118,110,0.2))', border: '1px solid rgba(20,184,166,0.3)' }}>
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-700/50">
+          <div>
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <Sparkles size={16} className="text-teal-400" /> Synthetic Data & Aquatic Scenarios Engine (Phase 14)
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Simulate biomechanically grounded aquatic distress regimes: Pia (1974) IDR, Submersion Immobility, Multi-Swimmer crowds.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleGenerateSyntheticVideo}
+              disabled={isGeneratingVideo}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-600 transition flex items-center gap-1.5"
+            >
+              {isGeneratingVideo ? <RefreshCw size={13} className="animate-spin" /> : <Video size={13} className="text-teal-400" />}
+              {isGeneratingVideo ? 'Rendering MP4...' : 'Render Synthetic Video'}
+            </button>
+            <button
+              onClick={handleEvaluateScenario}
+              disabled={isEvaluatingScenario}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-950 bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-300 hover:to-cyan-300 transition shadow-lg shadow-teal-500/20 flex items-center gap-1.5"
+            >
+              {isEvaluatingScenario ? <RefreshCw size={13} className="animate-spin" /> : <Activity size={13} />}
+              {isEvaluatingScenario ? 'Evaluating AI...' : 'Run Scenario AI Evaluation'}
+            </button>
+          </div>
+        </div>
+
+        {/* Scenario Selection Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {scenarios.map((scen) => {
+            const isSelected = selectedScenarioId === scen.id;
+            return (
+              <button
+                key={scen.id}
+                onClick={() => setSelectedScenarioId(scen.id)}
+                className={`p-2.5 rounded-lg text-left transition border ${
+                  isSelected
+                    ? 'bg-teal-950/60 border-teal-500/80 text-white shadow-sm'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:bg-slate-850 hover:text-slate-200'
+                }`}
+              >
+                <div className="flex items-center justify-between text-[11px] mb-1">
+                  <span className="font-bold text-teal-400">{scen.title.split(' ')[0]}</span>
+                  <span className={`px-1 rounded text-[9px] font-bold ${
+                    scen.risk_level === 'critical' ? 'bg-red-950 text-red-400' : scen.risk_level === 'warning' ? 'bg-amber-950 text-amber-400' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {scen.risk_level.toUpperCase()}
+                  </span>
+                </div>
+                <p className="text-[11px] font-semibold text-slate-200 truncate">{scen.title}</p>
+                <p className="text-[10px] text-slate-500 line-clamp-2 mt-1 leading-tight">{scen.description}</p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Parameter Sliders */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 rounded-lg bg-slate-900/60 border border-slate-800 text-xs">
+          <div className="space-y-1">
+            <div className="flex justify-between text-slate-300">
+              <span>Simulation Duration:</span>
+              <strong className="text-teal-400">{scenarioDuration}s</strong>
+            </div>
+            <input
+              type="range"
+              min="4"
+              max="20"
+              step="1"
+              value={scenarioDuration}
+              onChange={(e) => setScenarioDuration(parseFloat(e.target.value))}
+              className="w-full accent-teal-400"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex justify-between text-slate-300">
+              <span>Distress Onset Timestamp:</span>
+              <strong className="text-cyan-400">{distressOnset}s</strong>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max={Math.max(2, scenarioDuration - 2)}
+              step="0.5"
+              value={distressOnset}
+              onChange={(e) => setDistressOnset(parseFloat(e.target.value))}
+              className="w-full accent-cyan-400"
+            />
+          </div>
+        </div>
+
+        {/* Live Evaluation Report */}
+        {scenarioEvalResult && (
+          <div className="p-3.5 rounded-lg bg-slate-950/80 border border-teal-800/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <ShieldCheck size={14} className="text-teal-400" /> Scenario Evaluation Metrics ({scenarioEvalResult.scenario.toUpperCase()})
+              </h3>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                scenarioEvalResult.summary.sla_met ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'
+              }`}>
+                {scenarioEvalResult.summary.sla_met ? 'SLA MET (TTD < 2.5s)' : 'SLA WARNING'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
+                <span className="text-[11px] text-slate-500">Time-to-Detect (TTD)</span>
+                <p className="font-bold text-teal-300 text-sm mt-0.5">
+                  {scenarioEvalResult.summary.time_to_detect_seconds != null ? `${scenarioEvalResult.summary.time_to_detect_seconds}s` : 'N/A'}
+                </p>
+              </div>
+              <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
+                <span className="text-[11px] text-slate-500">Frame Accuracy</span>
+                <p className="font-bold text-white text-sm mt-0.5">{scenarioEvalResult.summary.accuracy_percent}%</p>
+              </div>
+              <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
+                <span className="text-[11px] text-slate-500">False Alarms Before Onset</span>
+                <p className="font-bold text-emerald-400 text-sm mt-0.5">{scenarioEvalResult.summary.false_alarms}</p>
+              </div>
+              <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
+                <span className="text-[11px] text-slate-500">Alerts Triggered</span>
+                <p className="font-bold text-cyan-400 text-sm mt-0.5">{scenarioEvalResult.evaluation.alerts_count}</p>
+              </div>
+            </div>
+
+            {/* Prediction Sample Dots */}
+            <div className="space-y-1">
+              <span className="text-[11px] text-slate-400">Sample Frame State Timeline:</span>
+              <div className="flex flex-wrap gap-1.5 p-2 rounded bg-slate-900/50 border border-slate-800 text-[10px]">
+                {scenarioEvalResult.evaluation.predictions_sample.map((p) => {
+                  const isDrown = p.predicted === 'drowning';
+                  const isDist = p.predicted === 'distress';
+                  return (
+                    <span
+                      key={p.frame_index}
+                      className={`px-1.5 py-0.5 rounded font-mono ${
+                        isDrown ? 'bg-red-950 text-red-300 border border-red-800' : isDist ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-slate-800 text-slate-400'
+                      }`}
+                      title={`t=${p.timestamp}s: GT=${p.ground_truth}, Pred=${p.predicted} (P_drown=${p.c_drowning})`}
+                    >
+                      {p.timestamp}s: {p.predicted[0].toUpperCase()}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       </div>
     </div>
   );

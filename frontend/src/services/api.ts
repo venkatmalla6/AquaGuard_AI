@@ -86,6 +86,48 @@ export interface BenchmarkResponse {
   };
 }
 
+
+export interface ScenarioItem {
+  id: string;
+  title: string;
+  description: string;
+  risk_level: string;
+  primary_label: string;
+  typical_onset_sec: number;
+  default_duration_sec: number;
+}
+
+export interface ScenarioEvaluationResponse {
+  status: string;
+  scenario: string;
+  evaluation: {
+    track_id: number;
+    scenario_type: string;
+    total_frames: number;
+    ground_truth_label: string;
+    frame_accuracy: number;
+    alerts_count: number;
+    first_alert: { frame_index: number; timestamp: number; level: string; behavior: string } | null;
+    time_to_detect_seconds: number | null;
+    false_alarms_before_onset: number;
+    predictions_sample: Array<{
+      frame_index: number;
+      timestamp: number;
+      ground_truth: string;
+      predicted: string;
+      c_drowning: number;
+      c_distress: number;
+      c_normal: number;
+    }>;
+  };
+  summary: {
+    time_to_detect_seconds: number | null;
+    accuracy_percent: number;
+    false_alarms: number;
+    sla_met: boolean;
+  };
+}
+
 export const authAPI = {
   login: (email: string, password: string) => api.post('/api/auth/login', { email, password }),
   logout: () => api.post('/api/auth/logout'),
@@ -139,4 +181,13 @@ export const videoAPI = {
   process: (id: number) => api.post(`/api/videos/${id}/process`),
   delete: (id: number) => api.delete(`/api/videos/${id}`),
   getStreamUrl: (id: number) => `${api.defaults.baseURL || ''}/api/videos/${id}/stream`,
+};
+
+
+export const scenarioAPI = {
+  list: () => api.get<{ status: string; count: number; scenarios: ScenarioItem[] }>('/api/scenarios'),
+  generate: (data: { scenario_type: string; duration_seconds: number; num_swimmers: number; distress_onset_second: number; render_video: boolean }) =>
+    api.post('/api/scenarios/generate', data),
+  evaluate: (data: { scenario_type: string; duration_seconds: number; distress_onset_second: number; edge_backend: string }) =>
+    api.post<ScenarioEvaluationResponse>('/api/scenarios/evaluate', data),
 };

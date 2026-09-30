@@ -262,20 +262,53 @@
 
 ---
 
+## Phase 14: Synthetic Data & Scenarios Engine [COMPLETE]
+
+- [x] Biomechanically Grounded Scenario Engine (`ai/scenarios/scenario_engine.py`):
+  - `SCENARIO_INSTINCTIVE_DROWNING`: Pia (1974) IDR response (vertical bobbing, lateral arm press, 0 forward translation)
+  - `SCENARIO_FRANTIC_DISTRESS`: Elevated acceleration variance, waving, high splash thrashing
+  - `SCENARIO_SUBMERSION_IMMOBILITY`: Shallow water blackout / unconscious sinking, shrinking bounding box, 95% inactivity
+  - `SCENARIO_NORMAL_LAP_SWIMMING`: Horizontal freestyle/breaststroke, steady speed, low vertical ratio
+  - `SCENARIO_PLAYFUL_SPLASHING`: Water play false alarm control (high variance but safe horizontal kinematics)
+  - `SCENARIO_MULTI_SWIMMER_CROWD`: 4 normal swimmers + 1 distressed swimmer testing occlusion and density
+  - 16-D feature matrix generation adhering to `TrackFeatureExtractor` schema
+- [x] Synthetic Video Renderer (`ai/scenarios/synthetic_video_renderer.py`):
+  - Renders HD MP4 video with animated caustic ripples, lane lines, swimmer avatars, splashing foam particles, and ground truth bounding boxes
+  - Generates matching frame-by-frame JSON ground truth annotations
+- [x] Scenario Evaluator (`ai/scenarios/scenario_evaluator.py`):
+  - Automated calculation of Time-to-Detect (TTD = 1.53s vs 2.5s SLA target)
+  - Evaluates false alarms before onset (0 false alarms) and frame accuracy
+- [x] Backend Simulation REST API (`backend/app/api/routes/scenarios.py`):
+  - `GET /api/scenarios`: Catalog of all physiological scenarios and parameters
+  - `POST /api/scenarios/generate`: On-demand trajectory and MP4 video generation
+  - `POST /api/scenarios/evaluate`: Automated evaluation of detection latency and frame accuracy
+  - Mounted `/synthetic` static route in `backend/app/main.py`
+- [x] Interactive Frontend Scenario Simulator (`frontend/src/pages/VideoTestingPage.tsx`):
+  - Scenario selector grid with risk badges, duration and onset sliders
+  - Live AI evaluation display with SLA indicator and sample state timeline
+  - "Render Synthetic Video" button saving directly to testing queue
+- [x] Automated Test Suite (`tests/test_scenarios.py`):
+  - 5 tests covering all scenario types, video rendering, evaluation, and REST API routes
+
+---
+
 ## Future Phases
 
-- Phase 14: Synthetic Data & Scenarios Engine
 - Phase 15: Paper Assets & Visualizations
 - Phase 16: Documentation & B.Tech Defense Pack
 
 
-- Phase 14: Synthetic Data & Scenarios Engine
 - Phase 15: Paper Assets & Visualizations
 - Phase 16: Documentation & B.Tech Defense Pack
 
 
 
-- Phase 14: Synthetic Data & Scenarios Engine
+- Phase 15: Paper Assets & Visualizations
+- Phase 16: Documentation & B.Tech Defense Pack
+
+
+
+
 - Phase 15: Paper Assets & Visualizations
 - Phase 16: Documentation & B.Tech Defense Pack
 
